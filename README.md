@@ -20,14 +20,16 @@ This project is in fulfillment of the [CPSC 312 2021W1 project requirements](htt
 
 Our team is:
 
-+ Team Member Name 1 (student # 1): optional awesome nickname 1
-+ Team Member Name 2 (student # 2): optional awesome nickname 2
-+ If you have a third member: Team Member Name 3 (student # 3): optional awesome nickname 3
-+ If you have a fourth member: Team Member Name 4 (student # 4): optional awesome nickname 4
++ Shaunak Tulshibagwale (student # 1): 
++ Jason Hsu (student # 2): 
++ Peyton Seigo: Team Member Name 3 (student # 3):
++ Markus: Team Member Name 4 (student # 4): TheHolyRatKing
 
-We call ourselves: optional awesome team name.
+We call ourselves: optional awesome team name 2.
 
 ## Product Pitch
+
+Our Pro(ject/duct) is a music visualizer that processes a song with various transformations and creates a visualization of shapes/colors using it.
 
 Replace this with a pitch for your project and the problem it solves. This is your vision for what the project
 would like like as a complete product, ready for awesome action. (Yes, awesomeness seems to be a theme.)
