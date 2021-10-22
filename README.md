@@ -23,26 +23,13 @@ We hope that in completion, this project will create unique visualizations that 
 We also hope for visualizations to be usable by external devices such as LED lights, LED light strips for a more lively musical experience. The visualizations, transformations, will all have run in real time for a timely visual.
 The proof-of-concept has been written to make our code flexible; By using interfaces that use polymorphic types, the steps of reading, processing, rendering, and saving data will also be polymorphic.
 
-Be sure that this touches clearly on the [project requirements](https://steven-wolfman.github.io/cpsc-312-website/project.html#project-requirements).
-
-Good goals to aim for are from the top two rubric items for proposal grading:
-
-> Exciting and language-appropriate product idea tackling a problem that is clearly compelling to a significant audience.
-
-Or:
-
-> Solid and language-appropriate product idea with a problem that is of real interest to the submitting team.
 
 (It's easy to focus on the product and not the problem. Remember to include both!)
 
 ## Minimal Viable Project
 
-- MVP is bar frequency animation
-- Fourier transform of signal and display the (normalized) volumes of frequency ranges
-- 
-
 Our Minimal Viable Project would be to a create a visualization that:
-- Reads any audio file in a .FLAC format
+- Reads any audio file in a .FLAC format, of a certain size
 - Processes audio by applying a fourier transform of the signal
 - Displays the normalized volumes as a bar frequency animation
 - Visualization is unique, but deterministic. If two completely different songs are entered, they should have different, equally valid visualizations
@@ -53,9 +40,6 @@ This project is a simplified version of the initial pitch as it simply creates a
 
 ## Proof of Concept
 
-- Mention how we can 1. Read data from a file, 2. apply filters to that data, 3. write functions which turn arbitraty data into 
-- Proof of concept also has a framework that allowes for 1. pure functions to be written that turn sound samples into data, and 2. pure functions to be written that turn data into animation frames. The entire effect system is complete. 
-- We can render a test video which proves that it's possible to write actual frames from an audio source, so the project is viable. 
 
 Our current POC does the following:
 - Reads data from an audio file
