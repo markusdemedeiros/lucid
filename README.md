@@ -1,5 +1,11 @@
 # CPSC 312 Project
 
+TODO
+- Add line references to the code (I don't know how to do this)
+- Go over the template and make sure we're hitting all the major points
+- Submit on PrairieLearn
+
+
 Project Template for CPSC 312 Projects. Use this for both your proposal and final project submission.
 
 (Since you are submitting a link to a specific commit, we will be able to tell the difference.)
@@ -112,7 +118,8 @@ Replace this section with instructions to us for how to test and run your code.
 
 - The basic audio pipeline can be run just using `stack run`, since our proof of concept is mainly just the impure IO actions which are difficult to unit test. In the future, when we are writing pure functions to apply into our pipeline, they will be easy to test with `stack test`. 
 
-- We use a couple libraries, they should all be in `stack.yaml`. The only one which might cause some difficulty to run is [conduit-audio-sndfile](https://hackage.haskell.org/package/conduit-audio-sndfile) since it is a wrapper around `libsndfile`. 
+- We use a couple libraries, they should all be in `stack.yaml`. The only one which might cause some difficulty to run is [conduit-audio-sndfile](https://hackage.haskell.org/package/conduit-audio-sndfile) since it is a wrapper around `libsndfile`. This library has had no difficulty on our Manjaro and Ubintu based systems, however we refer you to the docs if this is a serious difficulty on other operating systems. 
+
 
 
 Note: We expect to be able to test your code by running `stack test`. Included among your tests should be some that demonstrate the core functionality of your code. (We will be running `make haskell-eval` from the project root.)
