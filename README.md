@@ -78,15 +78,13 @@ Or:
 
 ## Proof of Concept
 
-- Mention how we can 1. Read data from a file, 2. apply filters to that data, 3. write functions which turn arbitraty data into 
-- Proof of concept also has a framework that allowes for 1. pure functions to be written that turn sound samples into data, and 2. pure functions to be written that turn data into animation frames. The entire effect system is complete. 
-- We can render a test video which proves that it's possible to write actual frames from an audio source, so the project is viable. 
+The major obstacle to the viability of this project is the outside effects of reading audio files and rendering data, so we wrote that aspect as our proof of concept.
 
+The test conduit reads data from `data/test_data.flac` and outputs a video `data/output.mp4` created by reading every frame of the audio file and putting out a static frame for every image. Examining the output anumation, you can see the zoomed in Haskell logo resizing itself in response to audio samples. We've signifigantly slown down the test animation so that this is visible. 
 
+Our proof of concept demonstrates that conduits are a viable strategy to eliminating side effects from the design of data filters. Pulling all our effects into a conduit allows us to write idiomatic haskell code at each stage without worrying about the actual process of reading and displaying the files. Seperating business logic from effects is a major benefit of Haskell, and we predict it will make implementing the mathematical procedures of audio and video effects (for example, computing fourier transforms or applying colour maps onto a rendered svg frame) signifigantly easier. 
 
-The test pipeline reads data from `data/test_data.flac` and outputs a video `data/output.mp4` created by reading every frame of the audio file and putting out a static frame for every image. Examining the output anumation, you can see the zoomed in Haskell logo resizing itself in response to audio samples. We've signifigantly slown down the test animation so that this is visible. 
-
-furthermore, our proof of concept demonstrates that conduits are a viable strategy to eliminating side effects from the design of data filters. 
+To explore our pipeline further, you can write more data filters in `processing.hs` which take `SoundStream`s to `DataStream`s of some type, and change the anonymous graphics function in line 8 of `Lib.hs` to another function from the `reanimate` library. Exploring the types should give you a good idea of the flexibility of our framework to create interesting audio visualizations with a simple, reusable interface.
 
 
 Replace this with a description of your proof-of-concept. This may be as short as a few paragraphs, or it may be longer.
@@ -112,11 +110,9 @@ A good goal to aim for is the top rubric item from proposal grading:
 
 Replace this section with instructions to us for how to test and run your code.
 
-- The basic audio pipeline can be run just using `stack run`, since our proof of concept is mainly just the impure IO actions which are hard to test. In the future, when we are writing pure functions to apply into our pipeline, they will be tested with `stack test`. 
+- The basic audio pipeline can be run just using `stack run`, since our proof of concept is mainly just the impure IO actions which are difficult to unit test. In the future, when we are writing pure functions to apply into our pipeline, they will be easy to test with `stack test`. 
 
 - We use a couple libraries, they should all be in `stack.yaml`. The only one which might cause some difficulty to run is [conduit-audio-sndfile](https://hackage.haskell.org/package/conduit-audio-sndfile) since it is a wrapper around `libsndfile`. 
-
-- To explore our pipeline further, you can write more data filters in `processing.hs` which take `SoundStream`s to `DataStream`s of some type, and change the anonymous graphics function in line 8 of `Lib.hs` to another function from the `reanimate` library. Exploring the types should give you a good idea of the flexibility of our framework to create interesting audio visualizations with a simple, reusable interface. 
 
 
 Note: We expect to be able to test your code by running `stack test`. Included among your tests should be some that demonstrate the core functionality of your code. (We will be running `make haskell-eval` from the project root.)
