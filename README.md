@@ -31,7 +31,8 @@ We call ourselves: optional awesome team name 2.
 
 Our Pro(ject/duct) is a music visualizer that processes a song with various transformations and creates a visualization of shapes/colors using it.
 
-- Mention doing it in a way that uses pure haskell functions can be written to make our code flexible. Haskell is good for this, because if we can write an interface that uses polymorphic types, the data reading, processing, rendering, and saving steps will be polymorphic. 
+We hope to write this in a way that allows us to write simple and reusable pure functions to make our visualizations easy to write and flexible to extend. Using polymorphic types, we define an interface which makes the data reading, processing, rendering, and saving steps orthogonal problems which interoperate well with existing libries. 
+
 
 Replace this with a pitch for your project and the problem it solves. This is your vision for what the project
 would like like as a complete product, ready for awesome action. (Yes, awesomeness seems to be a theme.)
@@ -54,7 +55,9 @@ Or:
 
 - MVP is bar frequency animation
 - Fourier transform of signal and display the (normalized) volumes of frequency ranges
-- 
+- This would demonstrate the strength of our interfaces between data processing and visualization, and would provide a set of essential tools (such as a fourier transform operator on audio samples) which future visualzations could reuse in some manner. 
+- This generality demonstrates the power of Haskell's polymorphic interfaces and typeclasses. In particular, it is a good application of referential transparency and pure interfaces, because we will be able to write pure visualizations that work on arbitrary data we pull out of an audio sample completely independently of how or what we decide to pull out from an audio file! 
+
 
 Replace this with a description of the minimal viable project you will actually build for CPSC 312 (if this becomes your final project).
 It may be as short as a few paragraphs, or it may be longer. It should **definitely** take less than 4 minutes
@@ -79,6 +82,13 @@ Or:
 - Proof of concept also has a framework that allowes for 1. pure functions to be written that turn sound samples into data, and 2. pure functions to be written that turn data into animation frames. The entire effect system is complete. 
 - We can render a test video which proves that it's possible to write actual frames from an audio source, so the project is viable. 
 
+
+
+The test pipeline reads data from `data/test_data.flac` and outputs a video `data/output.mp4` created by reading every frame of the audio file and putting out a static frame for every image. Examining the output anumation, you can see the zoomed in Haskell logo resizing itself in response to audio samples. We've signifigantly slown down the test animation so that this is visible. 
+
+furthermore, our proof of concept demonstrates that conduits are a viable strategy to eliminating side effects from the design of data filters. 
+
+
 Replace this with a description of your proof-of-concept. This may be as short as a few paragraphs, or it may be longer.
 It should **definitely** take less than 4 minutes to read carefully and thoroughly, though working through and running the
 code may take an extra 4 minutes. (Your guidance and links should make it easy for us to work through the code.)
@@ -102,24 +112,15 @@ A good goal to aim for is the top rubric item from proposal grading:
 
 Replace this section with instructions to us for how to test and run your code.
 
-- The basic audio pipeline can be run just using `stack run`, but we've also put an alias to running main in `stack test`. The test pipeline reads data from `data/test_data.flac` and outputs a video `data/output.mp4` created by reading every frame of the audio file and putting out a static frame for every image. 
+- The basic audio pipeline can be run just using `stack run`, since our proof of concept is mainly just the impure IO actions which are hard to test. In the future, when we are writing pure functions to apply into our pipeline, they will be tested with `stack test`. 
 
 - We use a couple libraries, they should all be in `stack.yaml`. The only one which might cause some difficulty to run is [conduit-audio-sndfile](https://hackage.haskell.org/package/conduit-audio-sndfile) since it is a wrapper around `libsndfile`. 
 
+- To explore our pipeline further, you can write more data filters in `processing.hs` which take `SoundStream`s to `DataStream`s of some type, and change the anonymous graphics function in line 8 of `Lib.hs` to another function from the `reanimate` library. Exploring the types should give you a good idea of the flexibility of our framework to create interesting audio visualizations with a simple, reusable interface. 
 
-
-As it is currently set up, editing works best if you first `cd` into the `haskell` subdirectory and open VS Code on that directory (`code .`). There is a `Makefile` with some helpful aliases, but you can also just use `stack` as normal.
 
 Note: We expect to be able to test your code by running `stack test`. Included among your tests should be some that demonstrate the core functionality of your code. (We will be running `make haskell-eval` from the project root.)
 
 We should be able to further explore your code's functionality by running `stack ghci`, and you should instruct us on some interesting cases to try.
 
 If you include instructions different from these, be **absolutely sure** that they will work well for us in whatever environment we run your code and that they will be as easy to use as the instructions above!
-
-### How to test and run the code: Prolog
-
-Replace this section with instructions to us for how to test and run your code.
-
-Instructions coming soon, but we expect you'll use the [Prolog Unit Testing](https://www.swi-prolog.org/pldoc/doc_for?object=section(%27packages/plunit.html%27)) library for testing and that we'll be able to run your code with `swipl`.
-
-
