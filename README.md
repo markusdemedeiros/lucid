@@ -1,18 +1,7 @@
-# CPSC 312 Project
 
-Project Template for CPSC 312 Projects. Use this for both your proposal and final project submission.
+# Lucid Visualizations
 
-(Since you are submitting a link to a specific commit, we will be able to tell the difference.)
-
-The template to edit begins below. You can delete this header section once you've begun.
-
-We will post some additional material to include when you reach the final project stage.
-
-# Insert My Excellent Project Title Here
-
-This will be replaced with a very brief (one paragraph, 2-3 sentences) overview of the project.
-
-Leave the following sentence in so you can easily link back to the requirements and *especially* rubric while editing your project:
+Lucid Visualization is an audio visualization tool that aims to create lucid, groovy, and ethereal visualizations of your favorite songs.
 
 This project is in fulfillment of the [CPSC 312 2021W1 project requirements](https://steven-wolfman.github.io/cpsc-312-website/project.html).
 
@@ -22,21 +11,17 @@ Our team is:
 
 + Shaunak Tulshibagwale (student # 1): 
 + Jason Hsu (student # 2): 
-+ Peyton Seigo: Team Member Name 3 (student # 3):
-+ Markus de Medeiros
++ Peyton Seigo: (student # 3):
++ Markus de Medeiros: (student # 4)
 
 We call ourselves: optional awesome team name 2.
 
 ## Product Pitch
 
-Our Pro(ject/duct) is a music visualizer that processes a song with various transformations and creates a visualization of shapes/colors using it.
-
-- Mention doing it in a way that uses pure haskell functions can be written to make our code flexible. Haskell is good for this, because if we can write an interface that uses polymorphic types, the data reading, processing, rendering, and saving steps will be polymorphic. 
-
-Replace this with a pitch for your project and the problem it solves. This is your vision for what the project
-would like like as a complete product, ready for awesome action. (Yes, awesomeness seems to be a theme.)
-It may be as short as a couple of paragraphs, or it may be longer. It should **definitely** take less than 4 minutes
-to read carefully and thoroughly.
+This project aims to create visualizations of audio files (songs) by reading and applying transformations to audio files (using [Conduit Audio](https://hackage.haskell.org/package/conduit-audio-0.2.0.3)) which could include fourier transforms, frequency isolations, etc. The transformed audio is then used with [Reanimate](https://hackage.haskell.org/package/reanimate), a haskell animation library based on SVG's. 
+We hope that in completion, this project will create unique visualizations that make use of many libraries available to transform audio. We also intend to use this audio to incorporate varieties of colors, shapes and entropy into the visualizations. Currently, we have Conduit Audio for our audio transformations, but later we could use more sophisticated libraries to get cooler audio transformations/visualizations.
+We also hope for visualizations to be usable by external devices such as LED lights, LED light strips for a more lively musical experience. The visualizations, transformations, will all have run in real time for a timely visual.
+The proof-of-concept has been written to make our code flexible; By using interfaces that use polymorphic types, the steps of reading, processing, rendering, and saving data will also be polymorphic.
 
 Be sure that this touches clearly on the [project requirements](https://steven-wolfman.github.io/cpsc-312-website/project.html#project-requirements).
 
@@ -56,22 +41,15 @@ Or:
 - Fourier transform of signal and display the (normalized) volumes of frequency ranges
 - 
 
-Replace this with a description of the minimal viable project you will actually build for CPSC 312 (if this becomes your final project).
-It may be as short as a few paragraphs, or it may be longer. It should **definitely** take less than 4 minutes
-to read carefully and thoroughly.
+Our Minimal Viable Project would be to a create a visualization that:
+- Reads any audio file in a .FLAC format
+- Processes audio by applying a fourier transform of the signal
+- Displays the normalized volumes as a bar frequency animation
+- Visualization is unique, but deterministic. If two completely different songs are entered, they should have different, equally valid visualizations
+- If the same song is inputted, the visualization should be the same
 
-Make clear:
-+ how this builds meaningfully toward your product pitch above, without being nearly as much work,
-+ how it builds on the strength and power of the language, and
-+ how it leads naturally to learning and applying some new element of the language (including what that element is!)
+This project is a simplified version of the initial pitch as it simply creates a bar frequency animation, instead of a visualization that has different colors and shape and is a little more interesting to look at. It builds meaningfully towards the pitch however, by being able read and write, and visualize audio. It also lends itself to be flexible into what kinds of functions we can plug into the transformation and visualization stages of the file processing, by using polymorphic types.
 
-Good goals to aim for are from the top two rubric items for proposal grading:
-
-> The minimal viable project (MVP) builds on the strengths and power of the language in exciting ways that will clearly lead to excellent learning for students.
-
-Or:
-
-> The MVP clearly builds significantly on the language and will lead in interesting and natural ways to learning for the students.
 
 ## Proof of Concept
 
@@ -79,24 +57,22 @@ Or:
 - Proof of concept also has a framework that allowes for 1. pure functions to be written that turn sound samples into data, and 2. pure functions to be written that turn data into animation frames. The entire effect system is complete. 
 - We can render a test video which proves that it's possible to write actual frames from an audio source, so the project is viable. 
 
-Replace this with a description of your proof-of-concept. This may be as short as a few paragraphs, or it may be longer.
-It should **definitely** take less than 4 minutes to read carefully and thoroughly, though working through and running the
-code may take an extra 4 minutes. (Your guidance and links should make it easy for us to work through the code.)
+Our current POC does the following:
+- Reads data from an audio file
+- applies filters to that data
+- Allows us to write pure functions which turn arbitrary data into animation frames. 
+- Renders a test video proving that it is possible to write actual frames from an audio source.
 
-Tell us:
+To extend our POC to the MVP and beyond, we simply have to a) write functions that we can plug into the current process that produce more interesting animations and b) ensure that the filters we apply do not take too long.
 
-+ what key element of your project the proof-of-concept focuses on
-+ what makes that such an important element
-+ how completing this gives you confidence that, with sufficient work, you could complete the full (minimal viable) project
+The POC focuses on the key concepts of reading audio files and rendering a sample. Some relevant links
 
-Include links (likely even line-level links, which are easy to create in Github) throughout to critical pieces of
-the code to make it easy for us to understand what you've accomplished and how it fulfills the requirements.
+https://github.students.cs.ubc.ca/shaunakt/cpsc312-project-new/blob/main/haskell/src/Sources.hs#L10-L14 - reading an audio stream
 
-Also include instructions for us to test and run your code. (See our guidelines below.)
+https://github.students.cs.ubc.ca/shaunakt/cpsc312-project-new/blob/main/haskell/src/Lib.hs#L24-L27 - Main function
 
-A good goal to aim for is the top rubric item from proposal grading:
+https://github.students.cs.ubc.ca/shaunakt/cpsc312-project-new/blob/main/haskell/src/Dataflow.hs - Fixing type constraints to ensure files match up
 
-> Fully functional proof-of-concept is easy to use and review, and it clearly demonstrates a key element necessary for the overall project.
 
 ### How to test and run the code: Haskell
 
@@ -107,14 +83,10 @@ Replace this section with instructions to us for how to test and run your code.
 - We use a couple libraries, they should all be in `stack.yaml`. The only one which might cause some difficulty to run is [conduit-audio-sndfile](https://hackage.haskell.org/package/conduit-audio-sndfile) since it is a wrapper around `libsndfile`. 
 
 
-
 As it is currently set up, editing works best if you first `cd` into the `haskell` subdirectory and open VS Code on that directory (`code .`). There is a `Makefile` with some helpful aliases, but you can also just use `stack` as normal.
-
-Note: We expect to be able to test your code by running `stack test`. Included among your tests should be some that demonstrate the core functionality of your code. (We will be running `make haskell-eval` from the project root.)
 
 We should be able to further explore your code's functionality by running `stack ghci`, and you should instruct us on some interesting cases to try.
 
-If you include instructions different from these, be **absolutely sure** that they will work well for us in whatever environment we run your code and that they will be as easy to use as the instructions above!
 
 ### How to test and run the code: Prolog
 
