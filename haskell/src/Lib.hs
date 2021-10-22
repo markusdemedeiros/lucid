@@ -14,8 +14,7 @@ import Sound.File.Sndfile (Sample)
 import Sources
 
 {-
- - Main interface for animation actions
- -
+ - Main interface for complete pipelins of actions
  -
  -}
 
