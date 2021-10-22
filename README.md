@@ -23,13 +23,15 @@ Our team is:
 + Shaunak Tulshibagwale (student # 1): 
 + Jason Hsu (student # 2): 
 + Peyton Seigo: Team Member Name 3 (student # 3):
-+ Markus: Team Member Name 4 (student # 4): TheHolyRatKing
++ Markus de Medeiros
 
 We call ourselves: optional awesome team name 2.
 
 ## Product Pitch
 
 Our Pro(ject/duct) is a music visualizer that processes a song with various transformations and creates a visualization of shapes/colors using it.
+
+- Mention doing it in a way that uses pure haskell functions can be written to make our code flexible. Haskell is good for this, because if we can write an interface that uses polymorphic types, the data reading, processing, rendering, and saving steps will be polymorphic. 
 
 Replace this with a pitch for your project and the problem it solves. This is your vision for what the project
 would like like as a complete product, ready for awesome action. (Yes, awesomeness seems to be a theme.)
@@ -50,6 +52,10 @@ Or:
 
 ## Minimal Viable Project
 
+- MVP is bar frequency animation
+- Fourier transform of signal and display the (normalized) volumes of frequency ranges
+- 
+
 Replace this with a description of the minimal viable project you will actually build for CPSC 312 (if this becomes your final project).
 It may be as short as a few paragraphs, or it may be longer. It should **definitely** take less than 4 minutes
 to read carefully and thoroughly.
@@ -68,6 +74,10 @@ Or:
 > The MVP clearly builds significantly on the language and will lead in interesting and natural ways to learning for the students.
 
 ## Proof of Concept
+
+- Mention how we can 1. Read data from a file, 2. apply filters to that data, 3. write functions which turn arbitraty data into 
+- Proof of concept also has a framework that allowes for 1. pure functions to be written that turn sound samples into data, and 2. pure functions to be written that turn data into animation frames. The entire effect system is complete. 
+- We can render a test video which proves that it's possible to write actual frames from an audio source, so the project is viable. 
 
 Replace this with a description of your proof-of-concept. This may be as short as a few paragraphs, or it may be longer.
 It should **definitely** take less than 4 minutes to read carefully and thoroughly, though working through and running the
@@ -91,6 +101,12 @@ A good goal to aim for is the top rubric item from proposal grading:
 ### How to test and run the code: Haskell
 
 Replace this section with instructions to us for how to test and run your code.
+
+- The basic audio pipeline can be run just using `stack run`, but we've also put an alias to running main in `stack test`. The test pipeline reads data from `data/test_data.flac` and outputs a video `data/output.mp4` created by reading every frame of the audio file and putting out a static frame for every image. 
+
+- We use a couple libraries, they should all be in `stack.yaml`. The only one which might cause some difficulty to run is [conduit-audio-sndfile](https://hackage.haskell.org/package/conduit-audio-sndfile) since it is a wrapper around `libsndfile`. 
+
+
 
 As it is currently set up, editing works best if you first `cd` into the `haskell` subdirectory and open VS Code on that directory (`code .`). There is a `Makefile` with some helpful aliases, but you can also just use `stack` as normal.
 
