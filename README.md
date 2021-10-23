@@ -10,7 +10,7 @@ Our team is:
 
 + Shaunak Tulshibagwale (98695802): nickname
 + Jason Hsu (44346849): nickname 
-+ Peyton Seigo (student # 3): nickname
++ Peyton Seigo (67914911): nickname
 + Markus de Medeiros (92214535): nickname
 
 We call ourselves: optional awesome team name 2.
