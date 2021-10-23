@@ -68,3 +68,8 @@ https://github.students.cs.ubc.ca/shaunakt/cpsc312-project-new/blob/main/haskell
 
 
 As it is currently set up, editing works best if you first `cd` into the `haskell` subdirectory and open VS Code on that directory (`code .`). There is a `Makefile` with some helpful aliases, but you can also just use `stack` as normal.
+
+
+By running `stack ghci`, you can use the function `basicAudioPipeline` which has the signature:
+`basicAudioPipeline :: FilePath -> (SoundStream a -> DataStream Double) -> (Double -> SVG) -> IO ()` 
+It can be called with different filters and functions to see how it works.
