@@ -71,6 +71,9 @@ As it is currently set up, editing works best if you first `cd` into the `haskel
 
 We should be able to further explore your code's functionality by running `stack ghci`, and you should instruct us on some interesting cases to try.
 
+By running `stack ghci`, you can use the function `basicAudioPipeline` which has the signature:
+`basicAudioPipeline :: FilePath -> (SoundStream a -> DataStream Double) -> (Double -> SVG) -> IO ()` 
+It can be called with different filters and functions to see how it works.
 
 ### How to test and run the code: Prolog
 
