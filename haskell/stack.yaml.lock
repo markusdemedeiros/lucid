@@ -5,40 +5,19 @@
 
 packages:
 - completed:
-    hackage: conduit-audio-0.2.0.3@sha256:2a94559ac636c4e2802367a9cea43b195b018bd9a79b8c1ec7bb729143c78d7e,1414
-    pantry-tree:
-      size: 224
-      sha256: 95b2dce3473e40189b2ddd23a4ab11ebc5e0799db143e11d143c9826014dca4b
-  original:
-    hackage: conduit-audio-0.2.0.3
-- completed:
-    hackage: conduit-audio-sndfile-0.1.2.2@sha256:a7d01ef0b81a02f5c4916cf99f8af3801ad50ca29a4bf0e519c1a250ac98152a,1358
-    pantry-tree:
-      size: 239
-      sha256: 9467ca3155238cac4c324084adff500ba15613d94524e3496c46ff639857ec94
-  original:
-    hackage: conduit-audio-sndfile-0.1.2.2
-- completed:
     hackage: hsndfile-0.8.0@sha256:3e77b6a4997e2c92b99864b1d63ec8fa42c9e4e26988f74bdf9930eb6793a323,1757
     pantry-tree:
       size: 745
       sha256: cb772a261c57519cb26e039baf541db8553dac9fa35ada7457f13c82e1f9c73c
   original:
-    hackage: hsndfile-0.8.0
+    hackage: hsndfile-0.8.0@sha256:3e77b6a4997e2c92b99864b1d63ec8fa42c9e4e26988f74bdf9930eb6793a323,1757
 - completed:
     hackage: hsndfile-vector-0.5.2@sha256:1cbe8589864a119bf8fe3768066e266a4e5d27aae9c2c17d36311e1bdb96102c,1261
     pantry-tree:
       size: 320
       sha256: e925694caa4b43932117c8f8036c6179be0d5330f1b6d697133012b9322f1fd9
   original:
-    hackage: hsndfile-vector-0.5.2
-- completed:
-    hackage: resourcet-1.2.4.3@sha256:8d334105a5a9cd33759d2b1e949f616f8ba031d0374b4b07771a720ad14871e1,1730
-    pantry-tree:
-      size: 647
-      sha256: 7a5c6f44ea9e422134b3b150378bc5bc48b4e11dfb5901f9282a939724f9b8bf
-  original:
-    hackage: resourcet-1.2.4.3
+    hackage: hsndfile-vector-0.5.2@sha256:1cbe8589864a119bf8fe3768066e266a4e5d27aae9c2c17d36311e1bdb96102c,1261
 snapshots:
 - completed:
     size: 587113

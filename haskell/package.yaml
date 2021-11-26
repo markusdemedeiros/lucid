@@ -4,14 +4,10 @@ version:             0.1.0.0
 
 dependencies:
 - base >= 4.7 && < 5
-- conduit
-- conduit-audio
-- conduit-audio-sndfile
-- mtl
-- resourcet
-- hsndfile
-- vector
 - reanimate
+- hsndfile
+- hsndfile-vector
+- vector
 
 library:
   source-dirs: src

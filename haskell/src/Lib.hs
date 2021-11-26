@@ -1,34 +1,42 @@
-module Lib
-  ( runAudioPipelineTest,
-  )
-where
+{-# LANGUAGE ScopedTypeVariables #-}
+module Lib where
 
-import Conduit (mapMC, mapM_C, runConduit, runConduitRes, takeC, toConsumer, (.|))
-import Control.Monad.Trans.Resource (runResourceT)
-import Dataflow
-import Processing (exampleFilter)
-import Reanimate (mkCircle, raster, reanimate)
-import Reanimate.Animation (Animation, SVG)
-import Reanimate.Raster (mkImage)
-import Reanimate.Render (Format (RenderMp4), Raster (RasterAuto), render)
-import Sound.File.Sndfile (Sample)
-import Sources
 
-{-
- - Main interface for complete pipelins of actions
+import qualified Data.Vector.Storable as SV
+import Sound.File.Sndfile as SF
+import qualified Sound.File.Sndfile.Buffer.Vector as BV
+
+
+__file_path :: FilePath
+__file_path = "./data/africa-toto.wav"
+
+
+__test :: IO (SV.Vector Double)
+__test = do
+    (info, Just (x :: BV.Buffer Double)) <- SF.readFile __file_path
+    putStrLn $ show info
+    return $ BV.fromBuffer x
+
+
+
+
+{- FRAGMENTS
+ -
+ - How to open a file
+ -
+ -  SF.openFile __file_path SF.ReadMode SF.defaultInfo  :: IO Handle
+ -
+ -
+ -
+ -  Get file info (frames, sampleRate, channels, etc).
+ -
+ -      SF.hInfo 
+ -
+ -
+ -
+ -
+ -
+ -
  -
  -}
 
-basicAudioPipeline :: FilePath -> (SoundStream a -> DataStream Double) -> (Double -> SVG) -> IO ()
-basicAudioPipeline path filter frameanimation = do
-  fileconduit <- startFileStream path :: IO (SoundStream Double)
-  runConduitRes (exampleFilter fileconduit .| renderingConduit 0.2 frameanimation) >>= renderanim
-  where
-    renderanim animation = render animation "./data/output.mp4" RasterAuto RenderMp4 400 300 60 False
-
-runAudioPipelineTest :: IO ()
-runAudioPipelineTest =
-  basicAudioPipeline
-    "./data/test_data.flac"
-    exampleFilter
-    (\s -> mkImage (50 + 2 * s) (50 + 2 * s) "./data/Haskell-Logo.svg")
