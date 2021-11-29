@@ -12,7 +12,7 @@ dependencies:
 - array
 - carray
 - storablevector-carray
-- easyplot
+- JuicyPixels
 
 library:
   source-dirs: src
