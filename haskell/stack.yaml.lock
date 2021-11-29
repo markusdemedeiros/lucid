@@ -5,6 +5,13 @@
 
 packages:
 - completed:
+    hackage: storablevector-carray-0.0@sha256:3340fd47d5f053fe0df91368c393eaf3c011ae60a242825ba78aed3ccddc4953,1260
+    pantry-tree:
+      size: 239
+      sha256: 2854b9814f81da914f8de4c91dfa8d21013ceca638294ad614e835980486ef21
+  original:
+    hackage: storablevector-carray-0.0@sha256:3340fd47d5f053fe0df91368c393eaf3c011ae60a242825ba78aed3ccddc4953,1260
+- completed:
     hackage: hsndfile-0.8.0@sha256:3e77b6a4997e2c92b99864b1d63ec8fa42c9e4e26988f74bdf9930eb6793a323,1757
     pantry-tree:
       size: 745
@@ -12,12 +19,19 @@ packages:
   original:
     hackage: hsndfile-0.8.0@sha256:3e77b6a4997e2c92b99864b1d63ec8fa42c9e4e26988f74bdf9930eb6793a323,1757
 - completed:
-    hackage: hsndfile-vector-0.5.2@sha256:1cbe8589864a119bf8fe3768066e266a4e5d27aae9c2c17d36311e1bdb96102c,1261
+    hackage: hsndfile-storablevector-0.5.2@sha256:f260b08d0d2670087f2a432437877dd93da7a8c763d3607548d6ccc0c7374a62,1309
     pantry-tree:
-      size: 320
-      sha256: e925694caa4b43932117c8f8036c6179be0d5330f1b6d697133012b9322f1fd9
+      size: 344
+      sha256: b4347f7a4157fa4a399bcd52bb9c5bbdf64e2ed773962dc0e1c86e62f88af8e5
   original:
-    hackage: hsndfile-vector-0.5.2@sha256:1cbe8589864a119bf8fe3768066e266a4e5d27aae9c2c17d36311e1bdb96102c,1261
+    hackage: hsndfile-storablevector-0.5.2@sha256:f260b08d0d2670087f2a432437877dd93da7a8c763d3607548d6ccc0c7374a62,1309
+- completed:
+    hackage: easyplot-1.0@sha256:3fec6ccf425b370ab668eb342bc4cd92777880653e27a982db7b225fd007cb2b,1936
+    pantry-tree:
+      size: 219
+      sha256: a5de94b54a51732bf70a601fca8c905fe074ecf870ea573db36d53a3bbb282f4
+  original:
+    hackage: easyplot-1.0@sha256:3fec6ccf425b370ab668eb342bc4cd92777880653e27a982db7b225fd007cb2b,1936
 snapshots:
 - completed:
     size: 587113

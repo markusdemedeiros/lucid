@@ -6,8 +6,13 @@ dependencies:
 - base >= 4.7 && < 5
 - reanimate
 - hsndfile
-- hsndfile-vector
-- vector
+- hsndfile-storablevector
+- storablevector
+- fft
+- array
+- carray
+- storablevector-carray
+- easyplot
 
 library:
   source-dirs: src
