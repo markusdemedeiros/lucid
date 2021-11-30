@@ -18,21 +18,6 @@ import Codec.Picture
 todo = undefined
 
 
-test_grid :: Image Pixel8
-test_grid = generateImage f test_w test_h 
-    where f x y = fromIntegral $ max (8*x `mod` 255) (8*y `mod` 255)
-          test_w = 800
-          test_h = 600
-
-
-writeTest :: Image Pixel8 -> IO () 
-writeTest = writePng "output.png" 
-
-
-
-
-__file_path :: FilePath
-__file_path = "./data/africa-toto.wav"
 
 __test :: IO (CArray Int Double)
 __test = do
@@ -118,14 +103,53 @@ timeslice_vector in_sps ot_sps vec = SV.sliceVertical chunksize vec
     where chunksize = in_sps `div` ot_sps
 
 
-__spectro :: IO ()
+
+
+
+
+
+__spectro :: IO ([[Double]])
 __spectro = do
     (info, Just (x :: BV.Buffer Double)) <- SF.readFile __file_path
-    putStrLn $ show $ SV.length $ BV.fromBuffer x
-    tsv <- return $ timeslice_vector (samplerate info) 1 $ BV.fromBuffer x
-    fbs <- return $ fmap (bucket_freqs 35 . fft) tsv
-    mapM (putStrLn . show . map (round . log)) fbs
-    return ()
+    -- putStrLn $ show $ SV.length $ BV.fromBuffer x
+    tsv <- return $ timeslice_vector (samplerate info) 2 $ BV.fromBuffer x
+    fbs <- return $ fmap (bucket_freqs 100 . fft) tsv
+    -- mapM (putStrLn . show . map (round . log)) fbs
+    return fbs
 
-    
+test_grid :: Image Pixel8
+test_grid = generateImage f test_w test_h 
+    where f x y = fromIntegral $ max (8*x `mod` 255) (8*y `mod` 255)
+          test_w = 800
+          test_h = 600
 
+writeTest :: Image Pixel8 -> IO () 
+writeTest = writePng "output.png" 
+
+__file_path :: FilePath
+__file_path = "./data/africa-toto.wav"
+
+__spectro_test :: IO()
+__spectro_test = do
+    spectrum_data <- __spectro
+    -- mapM (putStrLn . show . map round) $ normalize_fs spectrum_data
+    writeTest $ draw_freq $ normalize_fs $ spectrum_data
+
+normalize_fs :: [[Double]] -> [[Pixel8]] 
+normalize_fs fs = map (map norze) $ fs
+    where -- fsl     = map (map log) $ fs
+          abs_max = maximum . map maximum $ fs
+          abs_min = minimum . map minimum $ fs
+          norze d = fromIntegral (round((d+abs_min)*255/abs_max)) :: Pixel8
+
+draw_freq :: [[Pixel8]] -> Image Pixel8
+draw_freq df = generateImage f (scale*test_w) (scale*test_h)
+    where test_w = length df
+          test_h = length (df!!0)
+          f x y = (df!!(x `div` scale))!!(y`div`scale)
+          scale=5
+
+
+take_every_nth :: Int -> [a] -> [a]
+take_every_nth _ [] = []
+take_every_nth n l  = (head l):(take_every_nth n (drop n l))
