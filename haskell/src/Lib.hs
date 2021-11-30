@@ -15,32 +15,7 @@ import qualified Foreign.Storable as FS
 -- For testing only
 import Codec.Picture
 
-
--- Helper: Paritions a list into N segments of approximately equal length
-linspace :: Int -> [a] -> [[a]]
-linspace i l = linspace' (lindex i (length l)) l
-    where linspace' :: [Int] -> [a] -> [[a]]
-          linspace' [] x            = []
-          linspace' (i:is) x     
-                | (length x == 0)   = [x]
-                | otherwise         = (take i x):(linspace' (map (\x -> x-i) is) (drop i x))
-        
--- Helper: Creates a list of approximately equally spaced integers from 0 to N-1, 
--- excluding 0
-lindex :: Int -> Int -> [Int]
-lindex segments len = [round (i*sp') | i <- (map fromIntegral [1 .. segments])]
-    where sp' = (fromIntegral len)/(fromIntegral segments)
-
-
-linslice_with :: (FS.Storable a, FS.Storable b) => Int -> (a->b) -> CArray Int a -> [CArray Int b]
-linslice_with  n f car = map mkslice $ zip (0:is) is
-    where is = lindex n (size car)
-          mkslice (l,h) = CArr.sliceWithP (l, h-1) (0,0) f car
-
-
-linslice :: (FS.Storable a) => Int -> CArray Int a -> [CArray Int a]
-linslice i c = linslice_with i id c 
-
+todo = undefined
 
 
 test_grid :: Image Pixel8
@@ -57,7 +32,7 @@ writeTest = writePng "output.png"
 
 
 __file_path :: FilePath
-__file_path = "./data/sine.wav"
+__file_path = "./data/africa-toto.wav"
 
 __test :: IO (CArray Int Double)
 __test = do
@@ -122,32 +97,35 @@ subslice ts = CArr.sliceP (lo ts, hi ts) (0,0)
     
 
 -- Computes the DFT of a TimeSlice
-fft :: CArray Int Double -> CArray Int (Complex Double)
-fft = dftRC
+fft :: SV.Vector Double -> SV.Vector (Complex Double) -- CArray Int Double -> CArray Int (Complex Double)
+fft = TCA.from . dftRC . TCA.to
 
 spectra_sum :: CArray Int (Complex Double) -> Double
 spectra_sum = norm2
 
---             Sample rate of source
---                    Samples per second
-make_slices :: Int -> Int -> CArray Int Double -> [CArray Int Double]
-make_slices srsrc srout k = linslice approx_num_frames k
-    where approx_num_frames = round ((fromIntegral(size k)) * fromIntegral(srout)/fromIntegral(srsrc))
+-- Split frequency into n even ranges, discarding from the top, and take the norm of each
+bucket_freqs :: Int -> SV.Vector (Complex Double) -> [Double]
+bucket_freqs buckets v = map (norm2 . TCA.to) $ SV.sliceVertical chunksize v
+    where chunksize = (SV.length v) `div` buckets
+
+
+-- Helper: Takes input samples per second, output samples per second, and chunks a
+--  vector into evenly spaced chunks for the output rate
+--
+--  The last frame may be smalller. 
+timeslice_vector :: (FS.Storable a) => Int -> Int -> SV.Vector a -> [SV.Vector a]
+timeslice_vector in_sps ot_sps vec = SV.sliceVertical chunksize vec
+    where chunksize = in_sps `div` ot_sps
+
 
 __spectro :: IO ()
 __spectro = do
     (info, Just (x :: BV.Buffer Double)) <- SF.readFile __file_path
-    r <- return $ TCA.to $ BV.fromBuffer x
-    t <- return $ make_slices (samplerate info) 100 r
-    putStrLn . show $ t
-    -- putStrLn . show $ generate_slices (ReadParamaters 1) info
-    -- t <- return $  map ((flip subslice) r) $ generate_slices (ReadParamaters 1) info
-    -- putStrLn . show $ t
-    -- buckets <- return $ map (subslice_frac 1) t
-    -- mapM (putStrLn . show) buckets
+    putStrLn $ show $ SV.length $ BV.fromBuffer x
+    tsv <- return $ timeslice_vector (samplerate info) 1 $ BV.fromBuffer x
+    fbs <- return $ fmap (bucket_freqs 35 . fft) tsv
+    mapM (putStrLn . show . map (round . log)) fbs
     return ()
-   
 
-
-
+    
 
