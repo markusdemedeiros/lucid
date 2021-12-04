@@ -25,6 +25,13 @@ packages:
       sha256: b4347f7a4157fa4a399bcd52bb9c5bbdf64e2ed773962dc0e1c86e62f88af8e5
   original:
     hackage: hsndfile-storablevector-0.5.2@sha256:f260b08d0d2670087f2a432437877dd93da7a8c763d3607548d6ccc0c7374a62,1309
+- completed:
+    hackage: ffmpeg-light-0.14.0@sha256:4b8d45af99024fee650e46bb0219db18e626182e4e18cb7221d5716bda51620b,5299
+    pantry-tree:
+      size: 1557
+      sha256: 00948636e26379699b10f5c471cc8450a7baf5e7b39d9f3e2da6a4ce75191c9c
+  original:
+    hackage: ffmpeg-light-0.14.0@sha256:4b8d45af99024fee650e46bb0219db18e626182e4e18cb7221d5716bda51620b,5299
 snapshots:
 - completed:
     size: 587113

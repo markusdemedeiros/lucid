@@ -13,6 +13,7 @@ dependencies:
 - carray
 - storablevector-carray
 - JuicyPixels
+- ffmpeg-light
 
 library:
   source-dirs: src

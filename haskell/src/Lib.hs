@@ -1,96 +1,85 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Lib where
 
+import Util
+import Control.Monad (mapM_)
+
+-- Math Libraries
 import Data.Complex 
-
-import qualified Data.StorableVector as SV
-import Sound.File.Sndfile as SF
-import qualified Sound.File.Sndfile.Buffer.StorableVector as BV
-import qualified Data.StorableVector.CArray as TCA
 import Math.FFT
-import Data.Array.CArray as CArr
-import qualified Data.Array.IArray as Arr
-import qualified Foreign.Storable as FS
+import qualified Foreign.Storable                           as FS
 
--- For testing only
+-- Wrapper library for audio files
+import Sound.File.Sndfile                                   as SF
+import qualified Sound.File.Sndfile.Buffer.StorableVector   as BV
+
+-- Vector processing libraries
+import qualified Data.StorableVector                        as SV
+import qualified Data.StorableVector.CArray                 as TCA
+import qualified Data.Array.CArray                          as CA
+
+
+-- Static graphics library
 import Codec.Picture
 
-todo = undefined
+-- Animation library (ffmpeg bindings)
+import Codec.FFmpeg
+import Codec.FFmpeg.Juicy (imageWriter)
+
+__encoding_params :: EncodingParams
+__encoding_params = defaultParams 400 300
+
+__encoding_out :: FilePath
+__encoding_out = "vid-output.mp4"
+
+__writer :: IO (Maybe (Image Pixel8) -> IO ())
+__writer = imageWriter __encoding_params __encoding_out
+
+__file_path :: FilePath
+__file_path = "./data/africa-toto.wav"
+
+__spectro_test :: IO()
+__spectro_test = do
+    spectrum_data <- __spectro
+    writeTest $ draw_freq $ normalize_fs $ spectrum_data
+
+__frames_video :: IO()
+__frames_video = do
+    spectrum_data <- __spectro
+    wr <- __writer
+    mapM_ wr $ map (Just . __draw_frame) $normalize_fs $ spectrum_data
+    wr Nothing
 
 
 
-__test :: IO (CArray Int Double)
-__test = do
-    (info, Just (x :: BV.Buffer Double)) <- SF.readFile __file_path
-    putStrLn $ show info
-    r <- return $ TCA.to $ BV.fromBuffer x
-    putStrLn $ show (CArr.shape r)
-    return r
-
-__resize_test :: IO (CArray Int Double)
-__resize_test = do
-    x <- __test
-    return $ CArr.sliceP (0, 10) (0, 0) x
+__draw_frame :: [Pixel8] -> Image Pixel8
+__draw_frame df = generateImage f test_w test_h
+    where test_w = 400
+          test_h = 300
+          f x y = df!!((length df) * x `div` 400)
 
 
-data TimeSlice 
-    = TimeSlice { sampleRate :: Int -- Want to keep values as integers if possible
-                , lo :: Int
-                , hi :: Int
-                }
-        deriving (Eq, Show)
 
+-- __encoding_params = EncodingParams
+--                         { epWidth = 400
+--                         , epHeight = 300
+--                         , epFps = 30
+--                         , epCodec = Nothing
+--                         , epPixelFormat = Nothing
+--                         , epPreset = "medium"
+--                         , epFormatName = Nothing }
 
-data ReadParamaters
-    = ReadParamaters { samplePerSecond :: Int   -- Number of samples to take per second 
-                     }
-        deriving (Eq, Show)
-
-
-generate_slices :: ReadParamaters -> SF.Info -> [TimeSlice]
-generate_slices rp si = [TimeSlice sr i (i+nf-1) | i <- [0, nf .. fr]]
-    where nf = samplerate si `div` samplePerSecond rp 
-          sr = samplerate si 
-          fr = frames si
-
-
-__test_generate_slices :: IO ()
-__test_generate_slices = do 
-    (info, Just (x :: BV.Buffer Double)) <- SF.readFile __file_path
-    putStrLn . show $ info
-    mapM (putStrLn . show) $ generate_slices (ReadParamaters 1) info
-    return ()
-
-
--- Computes the amount of animation time a TimeSlice should occupy
-sliceDuration :: TimeSlice -> Double
-sliceDuration t = (hi' - lo') / sr'
-    where hi' = fromIntegral $ hi t
-          lo' = fromIntegral $ lo t
-          sr' = fromIntegral $ sampleRate t
-
--- Extract a subslice of a CArray correponding to a TimeSlice
-subslice :: TimeSlice -> CArray Int Double -> CArray Int Double
-subslice ts = CArr.sliceP (lo ts, hi ts) (0,0)
-
--- -- Extract a list of subslices in k buckets, mapping to magnitude
--- subslice_frac :: Int -> CArray Int (Complex Double) -> [CArray Int Double]
--- subslice_frac k c = [(CArr.sliceWithP (rsz*n, rsz*(n+1)-1) (0,0) magnitude c) | n <- [0..k-1]] 
---     where rsz = (size c) `div` k
---           takeNorm :: CArray Int Double -> Double
---           takeNorm = normSup
-    
 
 -- Computes the DFT of a TimeSlice
-fft :: SV.Vector Double -> SV.Vector (Complex Double) -- CArray Int Double -> CArray Int (Complex Double)
+fft :: SV.Vector Double -> SV.Vector (Complex Double)
 fft = TCA.from . dftRC . TCA.to
 
-spectra_sum :: CArray Int (Complex Double) -> Double
-spectra_sum = norm2
+spectra_sum :: CA.CArray Int (Complex Double) -> Double
+spectra_sum = CA.norm2
 
 -- Split frequency into n even ranges, discarding from the top, and take the norm of each
 bucket_freqs :: Int -> SV.Vector (Complex Double) -> [Double]
-bucket_freqs buckets v = map (norm2 . TCA.to) $ SV.sliceVertical chunksize v
+bucket_freqs buckets v = map (CA.norm2 . TCA.to) $ SV.sliceVertical chunksize v
     where chunksize = (SV.length v) `div` buckets
 
 
@@ -125,15 +114,6 @@ test_grid = generateImage f test_w test_h
 
 writeTest :: Image Pixel8 -> IO () 
 writeTest = writePng "output.png" 
-
-__file_path :: FilePath
-__file_path = "./data/africa-toto.wav"
-
-__spectro_test :: IO()
-__spectro_test = do
-    spectrum_data <- __spectro
-    -- mapM (putStrLn . show . map round) $ normalize_fs spectrum_data
-    writeTest $ draw_freq $ normalize_fs $ spectrum_data
 
 normalize_fs :: [[Double]] -> [[Pixel8]] 
 normalize_fs fs = map (map norze) $ fs
