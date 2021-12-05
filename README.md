@@ -72,6 +72,11 @@ https://github.students.cs.ubc.ca/shaunakt/cpsc312-project-new/blob/main/haskell
 
 ### How to test and run the code: Haskell
 
+- Usage: `stack build -- exec "lucid-exe [args]"`. The `-h` flag will provide up to date usage information. 
+
+
+
+
 - The basic audio pipeline can be run just using `stack run`, since our proof of concept is mainly just the impure IO actions which are difficult to unit test. In the future, when we are writing pure functions to apply into our pipeline, they will be easy to test with `stack test`. 
 
 - We use a couple libraries, they should all be in `stack.yaml`. The only one which might cause some difficulty to run is [conduit-audio-sndfile](https://hackage.haskell.org/package/conduit-audio-sndfile) since it is a wrapper around `libsndfile`. This library has had no difficulty on our Manjaro and Ubintu based systems, however we refer you to the docs if this is a serious difficulty on other operating systems. 
