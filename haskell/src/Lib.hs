@@ -13,24 +13,22 @@ import Codec.FFmpeg.Juicy (imageWriter)
 __file_path :: FilePath
 __file_path = "./data/africa-toto.wav"
 
+af_render :: IO()
+af_render = render_bar_plot __file_path "big-africa-render.mp4"
 
 
 __test_params = EncodingParams
                         { epWidth = 400
                         , epHeight = 300
-                        , epFps = 4
+                        , epFps = 20
                         , epCodec = Nothing
                         , epPixelFormat = Nothing
                         , epPreset = "medium"
                         , epFormatName = Nothing }
 
 
-
-
 default_writer :: FilePath -> IO (Maybe Frame -> IO())
 default_writer = imageWriter __test_params
-
-
 
 render_bar_plot  :: FilePath -> FilePath -> IO()
 render_bar_plot infile outfile = do
@@ -40,14 +38,14 @@ render_bar_plot infile outfile = do
     -- setup writer, send frames to file, close
     writer <- setup_writer 
     
-    mapM_ writer [Just (plotter bd) | bd <- take 16 (bar_compute num_bars soundData)]
+    mapM_ writer [Just (plotter bd) | bd <- bar_compute num_bars soundData]
 
     writer Nothing
     return ()
     where 
-        sps = 4
+        sps = epFps __test_params
         setup_writer = default_writer outfile
-        num_bars = 8
+        num_bars = 12
         plotter = bar_plot defaultImageMetadata
 
 

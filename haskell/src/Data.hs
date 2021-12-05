@@ -1,12 +1,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Data (read_sound, SlicedSound, seperate_freqs, freqs_rescale, one_norm, bar_compute) where
+module Data (read_sound, SlicedSound, seperate_freqs, freqs_rescale, sup_norm, bar_compute) where
 
 import Util
 
 -- Math Libraries
 import Data.Complex 
 import Math.FFT
+
+import Data.List (transpose)
 
 -- Additional vector processing libraries
 import qualified Data.StorableVector.CArray                 as TCA
@@ -88,9 +90,9 @@ seperate_freqs :: Int -> SampleFrequency -> [SampleFrequency]
 seperate_freqs buckets v = SV.sliceVertical chunksize v
     where chunksize = (SV.length v) `div` buckets
 
--- |compute the 1-norm of a range of frequencies (average)
-one_norm :: SampleFrequency -> Double
-one_norm samples = (/(fromIntegral(SV.length samples))) . SV.foldl1' (+) . SV.map magnitude $ samples
+-- |compute the infinity norm of a range of frequencies (average)
+sup_norm :: SampleFrequency -> Double
+sup_norm samples = SV.maximum . SV.map magnitude $ samples
 
 -- |renormalize an entire set of frequency data so it's maximum value has magnitude 1
 freqs_rescale :: [SampleFrequency] -> [SampleFrequency]
@@ -98,9 +100,17 @@ freqs_rescale samples = map (SV.map (/(max_magnitude :+ 0))) $ samples
     where max_magnitude = maximum . map (SV.maximum . SV.map magnitude) $ samples
 
 
-
+rolling_average :: Int -> [Double] -> [Double]
+rolling_average n ls = ls''''
+    where ls' = take (n-1) (repeat 0.0) ++ ls 
+          ls'' = map (\n' -> drop n' ls') [0..n-1]
+          ls''' = take (length ls) $ transpose ls''
+          ls'''' = map ((/ fromIntegral n) . foldr1 (+)) ls'''
 
 
 
 bar_compute :: Int -> SlicedSound -> [[Double]]
-bar_compute num_bars = map ((map one_norm) . seperate_freqs num_bars) . freqs_rescale . frequency
+bar_compute num_bars = map (rolling_average 2 . (map sup_norm) . tail . seperate_freqs (num_bars+1)) . freqs_rescale . frequency
+
+
+
