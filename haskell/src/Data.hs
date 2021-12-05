@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Data (read_sound, SlicedSound) where
+module Data (read_sound, SlicedSound, seperate_freqs, freqs_rescale, one_norm, bar_compute) where
 
 import Util
 
@@ -88,11 +88,19 @@ seperate_freqs :: Int -> SampleFrequency -> [SampleFrequency]
 seperate_freqs buckets v = SV.sliceVertical chunksize v
     where chunksize = (SV.length v) `div` buckets
 
--- |compute the norm of a range of frequencies
-norm_freqs :: [SampleFrequency] -> [Double]
-norm_freqs = map (CA.norm2 . TCA.to)
+-- |compute the 1-norm of a range of frequencies (average)
+one_norm :: SampleFrequency -> Double
+one_norm samples = (/(fromIntegral(SV.length samples))) . SV.foldl1' (+) . SV.map magnitude $ samples
+
+-- |renormalize an entire set of frequency data so it's maximum value has magnitude 1
+freqs_rescale :: [SampleFrequency] -> [SampleFrequency]
+freqs_rescale samples = map (SV.map (/(max_magnitude :+ 0))) $ samples
+    where max_magnitude = maximum . map (SV.maximum . SV.map magnitude) $ samples
 
 
 
 
 
+
+bar_compute :: Int -> SlicedSound -> [[Double]]
+bar_compute num_bars = map ((map one_norm) . seperate_freqs num_bars) . freqs_rescale . frequency

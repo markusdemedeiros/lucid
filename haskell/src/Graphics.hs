@@ -1,26 +1,61 @@
-module Graphics where
+module Graphics (bar_plot, ImageMetadata, defaultImageMetadata, Frame) where
 
+import Util
 
 -- Static graphics library (JuicyPixels) for individual frame drawing
 import Codec.Picture
 
--- Animation library (ffmpeg bindings)
-import Codec.FFmpeg
-import Codec.FFmpeg.Juicy (imageWriter)
 
-
+import Control.Monad (foldM, mplus)
 
 
 {- 
  - Graphics for the bar chart
  -}
 
-draw_bar_frame :: [Double] -> Image Pixel8
-draw_bar_frame = todo
+
+data ImageMetadata = ImageMetadata { width :: Int
+                                   , height :: Int
+                                   }
+
+defaultImageMetadata = ImageMetadata 400 300
 
 
 
+-- We only deal with one (fixed) pixel type
+type Pix = Pixel8
+type Frame = Image Pix
 
+-- -- Functional image
+-- type FImage = Int -> Int -> Pix
+-- 
+-- -- Masked functional image
+-- type MImage = Int -> Int -> Maybe Pix
+-- 
+-- -- One advantage of this representation: masking layers is really easy!
+-- 
+-- -- | Overlays image1 on top of image2
+-- mask_overlay :: MImage -> MImage -> MImage
+-- mask_overlay image1 image2 x y = mplus (image1 x y) (image2 x y)
+
+
+bar_plot :: ImageMetadata -> [Double] -> Frame
+bar_plot md ds = generateImage f (width md) (height md)
+    where f x y 
+            | y <= (height md - hbar) = 255
+            | otherwise = 0
+            where nbar = ((length ds) * x) `div` (width md) -- Width will span entire frame
+                  hbar = round $ 5 * (ds!!nbar)*(fromIntegral(height md))
+
+__test_bp :: [Double] -> IO()
+__test_bp d = writePng "./test_png_out.png" (bar_plot defaultImageMetadata d)
+
+
+-- render_MImage :: MImage -> FImage -> FImage
+-- render_MImage bkg = (\x y -> mask_f (f x y))
+--     where 
+--           mask_f Nothing    = bkg x y
+--           mask_f (Just x)   = const x
 
 
 
