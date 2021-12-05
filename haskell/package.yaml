@@ -4,9 +4,6 @@ version:             0.1.0.0
 
 dependencies:
 - base >= 4.7 && < 5
-- reanimate
-- hsndfile
-- hsndfile-storablevector
 - storablevector
 - fft
 - array
@@ -14,7 +11,8 @@ dependencies:
 - storablevector-carray
 - JuicyPixels
 - ffmpeg-light
-
+- hsndfile
+- hsndfile-storablevector
 library:
   source-dirs: src
 
