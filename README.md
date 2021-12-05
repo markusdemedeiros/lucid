@@ -72,8 +72,13 @@ https://github.students.cs.ubc.ca/shaunakt/cpsc312-project-new/blob/main/haskell
 
 ### How to test and run the code: Haskell
 
+- This project requires `ffmpeg`: either from your package manager of choice or downloaded off of their [website](https://ffmpeg.org/download.html). 
+
+- This project requires `libsndfile`: either from your package manager of choice or built from [source](https://github.com/libsndfile/libsndfile).
+
 - Usage: `stack build -- exec "lucid-exe [args]"`. The `-h` flag will provide up to date usage information. 
 
+- The basic functionality of the program can be invoked via `stack build --exec "lucid-exe -i [PATH]` where `PATH` is the path to a `.wav` file. This will create two files in the same directory as the `.wav` file: one without audio and one 
 
 
 

@@ -12,6 +12,8 @@ dependencies:
 - ffmpeg-light
 - hsndfile
 - hsndfile-storablevector
+- directory
+- process
 
 library:
   source-dirs: src
