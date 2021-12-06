@@ -41,11 +41,12 @@ type Frame = Image Pix
 bar_plot :: ImageMetadata -> [Double] -> Frame
 bar_plot md ds = generateImage f (width md) (height md)
     where f x y 
-            | (ds!!nbar) > 1 = error "shit"
+            | (ds!!nbar) > 1 = error "out of range value check"
             | (height md - y - 50) <= hbar = if (nbar `mod` 2) == 0 then 200 else 255
             | otherwise = 0
             where nbar = ((length ds) * x) `div` (width md)
-                  hbar = round $ 1.25**(fromIntegral nbar) *(ds!!nbar)*(fromIntegral(height md))
+                  hbar = round $ 14 * 0.8**(fromIntegral nbar) *(ds!!nbar)*(fromIntegral(height md))
+
 
 __test_bp :: [Double] -> IO()
 __test_bp d = writePng "./test_png_out.png" (bar_plot defaultImageMetadata d)

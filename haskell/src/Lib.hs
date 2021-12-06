@@ -36,7 +36,7 @@ render_bar_plot infile outfile = do
     soundData <- read_sound infile sps
     -- setup writer, send frames to file, close
     writer <- setup_writer 
-    mapM_ writer [Just (plotter bd) | bd <- bar_compute num_bars soundData]
+    mapM_ writer [(Just . plotter . reverse)  bd | bd <- bar_compute num_bars soundData]
     writer Nothing
     return ()
     where 
