@@ -1,4 +1,7 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Main where
+
 
 import Lib
 import Util
@@ -11,7 +14,10 @@ import System.Environment
 import System.Exit
 import System.IO
 
--- ffmpeg command: ffmpeg -i video.mp4 -i audio.wav -c:v copy -c:a aac output.mp4
+-- Used to check .wav file metadata, maybe refactor to data?
+import qualified Sound.File.Sndfile as SF
+import qualified Sound.File.Sndfile.Buffer.StorableVector   as BV
+
 
 main :: IO ()
 main = main_cli
@@ -36,19 +42,41 @@ exit_die        = exitWith (ExitFailure 1)
 visualize_file :: FilePath -> IO ()
 visualize_file fp = do check_wav . check_exists . ask_overwrite $ return ()
                        temp_out <- gen_temp_file 
+                       temp_pre <- gen_temp_audio
+                       
                        -- fp is the input filepath: exists, is .wav file
+                       -- temp_mono is the mono-audio filepath: does not exist
                        -- temp_out is the no-audio filepath: does no exist
                        -- out_file is the output file: does not exist
-                       render_bar_plot fp temp_out
-                       putStrLn $ ">> " ++ temp_out ++ " written"
+                       
+                       -- Preprocess audio with FFMPEG call 
+                       channels <- check_channels fp
+                       er_ffmpeg <- rawSystem "ffmpeg" ["-i", fp, 
+                                                        "-ac", "1",
+                                                        temp_pre]
+                       putStrLn $ ">> Preprocessed audio " ++ temp_pre ++ " written"
+                       
+                       -- Render the video frames
+                       render_bar_plot temp_pre temp_out
+                       putStrLn $ ">> Video " ++ temp_out ++ " written"
+                       
+                       -- Combine and cleanup
                        er_ffmpeg <- rawSystem "ffmpeg" ["-i", temp_out, 
-                                                        "-i", fp, 
+                                                        "-i", temp_pre, 
                                                         "-c:v", "copy", 
                                                         "-c:a", "aac", 
                                                         out_file]
                        case er_ffmpeg of
-                            ExitSuccess -> putStrLn (">> " ++ out_file  ++ " written") >> exit_good
-                            (ExitFailure n) -> putStrLn (">> FFMPEG error: " ++ show n) >> exit_die
+                            ExitSuccess -> do
+                                putStrLn (">> " ++ out_file  ++ " written") 
+                                cleanup [temp_pre, temp_out]
+                                exit_good
+                            (ExitFailure n) -> do
+                                putStrLn (">> FFMPEG error: " ++ show n) 
+                                cleanup [temp_pre, temp_out]
+                                exit_die
+
+
 
     where check_wav :: IO () -> IO () 
           check_wav next = if (isSuffixOf ".wav" fp) 
@@ -92,15 +120,26 @@ visualize_file fp = do check_wav . check_exists . ask_overwrite $ return ()
           
           -- temporary file to output video to
           gen_temp_file :: IO FilePath
-          gen_temp_file = gen_temp_file' (basefile ++ "_noaudio")
+          gen_temp_file = gen_temp_file' ".mp4" (basefile ++ "_noaudio")
+        
+          -- temporary file to output mono audio to
+          gen_temp_audio :: IO FilePath 
+          gen_temp_audio = gen_temp_file' ".wav" (basefile ++ "_mono")
           
-          gen_temp_file' :: FilePath -> IO FilePath
-          gen_temp_file' fp = do
-                file_exists <- doesFileExist (fp ++ ".mp4")
-                if file_exists then gen_temp_file' (fp ++ "_") else return (fp ++ ".mp4")
+          gen_temp_file' :: String -> FilePath -> IO FilePath
+          gen_temp_file' extension fp = do
+                file_exists <- doesFileExist (fp ++ extension)
+                if file_exists then gen_temp_file' extension (fp ++ "_") else return (fp ++ extension)
+           
+          -- Deletes temporary files from disk
+          cleanup :: [FilePath] -> IO()
+          cleanup fs = mapM_ removeFile fs
 
 
-
-
+-- (external) Reads the number of channels in a .wav file
+check_channels :: FilePath -> IO (Int)
+check_channels file = do
+    (info, _) <- SF.readFile file :: IO (SF.Info, Maybe (BV.Buffer Double))
+    return $ SF.channels info
 
 

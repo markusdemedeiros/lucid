@@ -41,13 +41,14 @@ read_wav file = do
     case mb_data of 
         Just (dat :: SoundData) -> return $ (info, dat)
         _ -> error "error: file read error"
-    
+
+
 __t :: IO()
 __t = do
-    (info, Just (dd :: SoundData)) <- SF.readFile "./data/africa-toto.wav"
-    print info
     (info1, Just (d1 :: SoundData)) <- SF.readFile "./data/not-a-rickroll.wav"
     print info1
+    (info, Just (d :: SoundData)) <- SF.readFile "./data/not-a-rickroll_mono.wav"
+    print info
 
 
 -- Synonyms for 
@@ -72,7 +73,6 @@ slice_vector in_sps ot_sps vec = SV.sliceVertical chunksize vec
     where chunksize = in_sps `div` ot_sps
 
 
-
 read_sound :: FilePath -> Int -> IO (SlicedSound)
 read_sound file out_sps = do
     (info, dat) <- read_wav file
@@ -82,6 +82,36 @@ read_sound file out_sps = do
                              , framerate = out_sps }
     
 
+-- | Average channels together in multi-channel tracks
+-- (BROKEN- WAV FORMAT IS MORE COMPLEX THEN I THOUGHT. USE FFMPEG ON THE FRONT LAYER INSTEAD)
+unchannel :: (SF.Info, SoundData) -> (SF.Info, SV.Vector Double)
+unchannel (info, dat) = (new_info, new_data)
+    where new_frames = frames info `div` channels info 
+
+          dat_unpacked :: SV.Vector Double
+          dat_unpacked = BV.fromBuffer dat
+          
+          -- gets the n'th (averaged) frame from dat_unpacked
+          -- starts at 0
+          get_frame :: Int -> Double
+          get_frame n = (/ fromIntegral (channels info)) . 
+                        foldr (+) 0 . 
+                        map (SV.index dat_unpacked) $ [(channels info)*n..(channels info)*(n+1)-1]
+          
+          new_data :: SV.Vector Double
+          new_data = SV.pack . map get_frame $ [0 .. new_frames - 1]
+
+          -- roses are red
+          -- LED's are brightening
+          -- I wish I understood lenses
+          -- but (<<%@=) is f****** frightening
+          new_info :: SF.Info
+          new_info = Info { frames = new_frames
+                          , samplerate = samplerate info `div` channels info
+                          , channels = 1
+                          , format = format info 
+                          , sections = sections info
+                          , seekable = seekable info }
 
 
 {-

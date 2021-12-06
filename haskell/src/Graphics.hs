@@ -21,7 +21,6 @@ data ImageMetadata = ImageMetadata { width :: Int
 defaultImageMetadata = ImageMetadata 400 300
 
 
-
 -- We only deal with one (fixed) pixel type
 type Pix = Pixel8
 type Frame = Image Pix
