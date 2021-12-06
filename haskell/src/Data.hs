@@ -146,7 +146,7 @@ rolling_average n ls = ls''''
 
 
 bar_compute :: Int -> SlicedSound -> [[Double]]
-bar_compute num_bars = map (rolling_average 2 . (map sup_norm) . tail . seperate_freqs (num_bars+1)) . freqs_rescale . frequency
+bar_compute num_bars = transpose . map (rolling_average 2) .  transpose . map ((map sup_norm) . tail . seperate_freqs (num_bars+1)) . freqs_rescale . frequency
 
 
 

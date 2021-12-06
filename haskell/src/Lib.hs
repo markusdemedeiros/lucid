@@ -18,8 +18,8 @@ af_render = render_bar_plot __file_path "big-africa-render.mp4"
 
 
 __test_params = EncodingParams
-                        { epWidth = 400
-                        , epHeight = 300
+                        { epWidth = 852
+                        , epHeight = 480
                         , epFps = 20
                         , epCodec = Nothing
                         , epPixelFormat = Nothing
@@ -36,13 +36,13 @@ render_bar_plot infile outfile = do
     soundData <- read_sound infile sps
     -- setup writer, send frames to file, close
     writer <- setup_writer 
-    mapM_ writer [(Just . plotter . reverse)  bd | bd <- bar_compute num_bars soundData]
+    mapM_ writer [(Just . plotter)  bd | bd <- zip (reverse (bar_compute num_bars soundData)) [1..]]
     writer Nothing
     return ()
     where 
         sps = epFps __test_params
         setup_writer = default_writer outfile
-        num_bars = 12
+        num_bars = 96
         plotter = bar_plot defaultImageMetadata
 
 
