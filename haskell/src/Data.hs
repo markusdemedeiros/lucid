@@ -42,6 +42,12 @@ read_wav file = do
         Just (dat :: SoundData) -> return $ (info, dat)
         _ -> error "error: file read error"
     
+__t :: IO()
+__t = do
+    (info, Just (dd :: SoundData)) <- SF.readFile "./data/africa-toto.wav"
+    print info
+    (info1, Just (d1 :: SoundData)) <- SF.readFile "./data/not-a-rickroll.wav"
+    print info1
 
 
 -- Synonyms for 

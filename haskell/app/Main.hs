@@ -47,7 +47,7 @@ visualize_file fp = do check_wav . check_exists . ask_overwrite $ return ()
                                                         "-c:a", "aac", 
                                                         out_file]
                        case er_ffmpeg of
-                            ExitSuccess -> putStrLn (">> " ++ temp_out ++ " written") >> exit_good
+                            ExitSuccess -> putStrLn (">> " ++ out_file  ++ " written") >> exit_good
                             (ExitFailure n) -> putStrLn (">> FFMPEG error: " ++ show n) >> exit_die
 
     where check_wav :: IO () -> IO () 
