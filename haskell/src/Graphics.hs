@@ -1,152 +1,161 @@
-module Graphics (bar_plot_480, ImageMetadata, defaultImageMetadata, Frame) where
-
+module Graphics ( bar_plot_480_48
+                , Frame
+                ) where
 
 import Data (in_frame_normalize)
-
 import Util
 
+-- Helper functions
+import Control.Monad (foldM, mplus)
 import Data.Fixed (mod')
 
--- Static graphics library (JuicyPixels) for individual frame drawing
+-- Static graphics library (JuicyPixels) 
 import Codec.Picture
 
 
-import Control.Monad (foldM, mplus)
-
-
 {- 
- - Graphics for the bar chart
+ - Bar graph graphics
  -}
 
 
-data ImageMetadata = ImageMetadata { width :: Int
-                                   , height :: Int
-                                   }
 
-defaultImageMetadata = ImageMetadata 1280 720 
-
-
--- We only deal with one (fixed) pixel type
+-- | The fixed pixel type: 8-bit RGB pixels
 type Pix = PixelRGB8
+
+-- | The fixed image type
 type Frame = Image Pix
 
 
+-- | Produces a frame of the 480p plot with 48 bars
+-- |    Arguments: 
+-- |        ds'         a length 48 list of frequency values (*)
+-- |        t           current frame of animation
+-- |        num_f       total number of frames in the animation
+-- |        ms'         historical frequency values (maximum of last 8 frames)
+-- |
+-- | (*) where are my dependent types?! why can't we do the project in Idris?!
+bar_plot_480_48 :: ([Double], Int, Int, [Double]) -> Frame
+bar_plot_480_48 (ds', t, num_f, ms') = generateImage f wt ht 
+        where   f x y
+                    -- The image is constructed in layers, from top to bottom.
+                    -- because of this, the helper functions depend on each other as they can
+                    -- overdraw without consequence. Mind this. 
+                    | in_time_bar        = rainbow_cts (x - t)
+                    | in_time_line       = PixelRGB8 200 200 200 
+                    | on_grid_y          = white
+                    | on_border          = white
+                    | on_grid_x          = white
+                    | in_vol_bar         = vol_grad (ds_nf!!(bar x))
+                    | in_on_freq_bar     = bar_grad $ (fromIntegral (ht-y-32))/(fromIntegral (ht-32-56))
+                    | in_hist_bar        = PixelRGB8 204 255 156
+                    | mod3_shade         = PixelRGB8 220 240 220 
+                    | otherwise          = white 
+                                
+                    where time_pct       = (fromIntegral (wt-64))*(fromIntegral t)/fromIntegral num_f
+                          in_time_bar    = andmap   [ y >= ht-23
+                                                    , y <= ht-21
+                                                    , x > 32
+                                                    , x < 32 + round time_pct]
+                          in_time_line   = andmap   [ y == ht-22
+                                                    , x > 32
+                                                    , x < wt-32 ]
+                          on_grid_y      = andmap   [ y >= 32
+                                                    , y <= ht-56
+                                                    , x > x_pad
+                                                    , x < wt-x_pad
+                                                    , (ht-56-y)`mod` 12 < 2 ]
+                          on_border      = ormap    [ y > ht - 32
+                                                    , y < 40
+                                                    , (y>ht-56) && (y<ht-48)
+                                                    , x <= x_pad
+                                                    , x >= wt- x_pad ]
+                          on_grid_x      = (x - x_pad + 1) `mod` wt_bar < 2
+                          in_vol_bar     = y >= ht-48
+                          in_on_freq_bar = y > ht-56-(ds!!(bar x))*12
+                          in_hist_bar    = y >= ht-56-(ms!!(bar x))*12 
+                          mod3_shade     = ((x + y) `mod` 3) == 0
+                            
 
--- bar_plot :: ImageMetadata -> ([Double], Int) -> Frame
--- bar_plot md (ds, t) = generateImage f (width md) (height md)
---     where f x y 
---             | (ds!!nbar) > 1 = error "out of range value check"
---             | (height md - y - 20) <= hbar = rainbow!!mag
---             | otherwise = (PixelRGB8 (fromIntegral (x+t) `mod` 255) 
---                                      (fromIntegral (y+3*round(100 * sin(fromIntegral t / 40))) `mod` 255) 
---                                      (fromIntegral(x*y`div`30) `mod` 255))
---             where nbar = ((length ds) * x) `div` (width md)
---                   hbar = round $ 0.3* (fromIntegral nbar) * (ds!!nbar)*(fromIntegral(height md))
---                   mag = (round (fromIntegral nbar + (fromIntegral t) / 30)) `mod` lr
---                   rainbow = [ PixelRGB8 255 0 0
---                             , PixelRGB8 255 127 0
---                             , PixelRGB8 255 255 0
---                             , PixelRGB8 127 255 0
---                             , PixelRGB8 0 255 0
---                             , PixelRGB8 0 255 127
---                             , PixelRGB8 0 255 255
---                             , PixelRGB8 0 127 255
---                             , PixelRGB8 0 0 255
---                             , PixelRGB8 120 0 255
---                             , PixelRGB8 255 0 255
---                             , PixelRGB8 255 0 127 ]
---                   lr = length rainbow
-
-
-
--- Produces 640x480 bar plot of 48 bars
-bar_plot_480 :: ([Double], Int, Int, [Double]) -> Frame
-bar_plot_480 (ds', t, num_f, ms') = generateImage f wt ht 
-        where   f x y 
-                    | (ht-y <= 23) && (21 <= ht-y) && (x > 32) && (x < 32 + round ((fromIntegral (wt-64))*(fromIntegral t)/fromIntegral num_f))
-                            = rainbow_cts (x - t)
-                    | (ht-y == 22) && (x > 32) && (x < wt-32)
-                            = PixelRGB8 200 200 200 
-                    | ((y-32) >= 0) 
-                            && (ht-y>=56) 
-                            && (x > x_pad) 
-                            && (wt-x>x_pad)
-                            && (ht-56-y)`mod` 12 < 2
-                            = wht
-                    | (y > ht - 32) || ((y>ht-56)&&(y<ht-48)) || (y < 40)
-                            = wht
-                    | (x <= x_pad) || ( (wt-x) <= x_pad)
-                            = wht
-                    | (x - x_pad + 1) `mod` wt_bar < 2
-                            = wht
-                    | y >= ht-48
-                            = vol_grad (ds_nf!!(bar x))
-                    | y > ht-56-(ds!!(bar x))*12
-                            = bar_grad $ (fromIntegral (ht-y-32))/(fromIntegral (ht-32-56))
-                    | (y >= ht-56-(ms!!(bar x))*12) -- && (y > ht-56-(1+(ms!!(bar x)))*12) -- && (((x + y) `mod` 2) == 0) 
-                            = PixelRGB8 204 255 156
-                    | otherwise 
-                            = if (((x + y) `mod` 3) == 0) 
-                                then PixelRGB8 220 240 220 -- bar_grad (ds!!(bar x))
-                                else wht
-                            -- = PixelRGB8 0  (round((ds!!(bar x))*2048)) (round((ds!!(bar x))*255))
-                wt = 640
-                ht = 480
-
+                -- | Constants for this animation
+                wt, ht, num_bars, x_pad, levels, wt_bar :: Int
+                wt              = 640   -- frame width
+                ht              = 480   -- frame height
+                num_bars        = 48    -- number of bars
+                x_pad           = 32    -- left/right x padding
+                levels          = 32    -- discrete audio levels
+                wt_bar          = 12    -- width of a bar
+                
+                -- |Gradient for the vertical bars      
+                bar_grad :: Double -> Pix
+                bar_grad = pix_grad light_green green_yellow 
+                
+                -- | Gradient for the intensity blocks, nonlinearized to boost low end 
+                vol_grad :: Double -> Pix
+                vol_grad = pix_grad white red . circ_dynamize . (*3)
+                
+                -- | In-frame normalized volume data for intensity bar
+                ds_nf :: [Double]
                 ds_nf = in_frame_normalize ds'
                 
-                -- Computes a rainbow colour with some continuously varying offset
-                rainbow_cts :: Int -> PixelRGB8
-                rainbow_cts delta = PixelRGB8 (mc delta') (mc (delta' + 2*pi /3)) (mc (delta' + 4*pi/3))
-                    where mc :: Double -> Pixel8
-                          mc x = round . max 0 . (*255) $ (*0.5) . (+1) . cos . min pi . (-pi+) $ mod' x (2 * pi)
-                          delta' = (fromIntegral delta) / 28
-              
-                num_bars        = 48
-                x_pad           = 32
-                levels          = 32
-                wt_bar          = 12
-                 
-                bar_grad :: Double -> PixelRGB8 
-                bar_grad = pix_grad (PixelRGB8 69 230 73) (PixelRGB8 255 255 0) -- (PixelRGB8 220 227 91) 
-                
-                vol_grad = pix_grad (PixelRGB8 255 255 255) (PixelRGB8 255 0 0) . circ_dynamize . (*3) -- (PixelRGB8 220 227 91) 
-                -- pix_grad (PixelRGB8 255 0 0) (PixelRGB8 0 0 255)
-                -- pix_grad (PixelRGB8 255 94 98) (PixelRGB8 255 153 102) 
-
-                wht             = PixelRGB8 255 255 255
-                gry             = PixelRGB8 190 199 199
-                red             = PixelRGB8 187 32 32
-                blu             = PixelRGB8 6 17 28
-                ylw             = PixelRGB8 255 235 77
-                blk             = PixelRGB8 18 19 23
-
-                -- 0 gives the left pixel
-                -- 1 gives the right pixel
-                pix_grad :: PixelRGB8 -> PixelRGB8 -> Double -> PixelRGB8 
-                pix_grad (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) d = PixelRGB8 (grad r1 r2) (grad g1 g2) (grad b1 b2) 
-                    where grad v1 v2 = round $ (fromIntegral v1 * (1-d) + fromIntegral v2 * d)
-
+                -- | Discretized history and frequency values
+                ms, ds :: [Int]
                 ms              = map (disc 32) . take num_bars $ ms'
                 ds              = map (disc 32 . circ_dynamize) . take num_bars $ ds'
-                bar x           = (((x - x_pad) `div` wt_bar))  --`mod` num_bars
+                
+                -- | Determines which bar pixel x is a part of
+                bar :: Int -> Int
+                bar x           = (x - x_pad) `div` wt_bar
+
+
+-- | Colours
+white :: Pix
+white               = PixelRGB8 255 255 255
+light_green         = PixelRGB8 69 230 73
+green_yellow        = PixelRGB8 255 255 0
+red                 = PixelRGB8 255 0 0
 
 
 
+-- | Computes a rainbow colour with some continuously varying offset delta in discrete 
+-- |    units (either pixels for space or ticks for time)
+rainbow_cts :: Int -> Pix
+rainbow_cts delta = PixelRGB8 (mc delta') (mc (delta' + 2*pi /3)) (mc (delta' + 4*pi/3))
+    where -- | compute the magnitude of one component (shifted, zeroed, cosine wave)
+          mc :: Double -> Pixel8
+          mc x = round . max 0 . (*255) . (*0.5) . (+1) . cos . min pi . (-pi+) $ mod' x (2 * pi)
+          
+          -- | rescale input for a more gradual visual effect
+          delta' = (fromIntegral delta) / 28
 
-__tp :: IO()
-__tp = writePng "./test_image.png" (bar_plot_480 ([fromIntegral i / 48 | i <- [0..47]], 75, 100, [0.25 + ((fromIntegral i / 48) + 1) / 2| i <- [0..47] ] ))
 
--- disc n discretizes a double between 0 and 1 to an integer between 0 and (n-1) inclusive
---  clamping numbers outside the region
+-- | Computes a linear gradient from the one pixel to another, indexed by a double in [0,1]
+pix_grad :: PixelRGB8 -> PixelRGB8 -> Double -> PixelRGB8 
+pix_grad (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) d = PixelRGB8 (grad r1 r2) (grad g1 g2) (grad b1 b2) 
+    where grad v1 v2 = round $ (fromIntegral v1 * (1-d) + fromIntegral v2 * d)
+
+
+-- | discretizes a double between 0 and 1 to an integer between 0 and (n-1) inclusive
+-- | clamping numbers outside the region
 disc :: Int -> Double -> Int
 disc n d = max 0 . min (n-1) $ floor (fromIntegral (n-1) * d)
 
--- makes a double more dynamic by mapping with the unit ciricle function
--- just a little bump to the derivative on the low amplitude range goes a long way
+
+-- | makes a double value more dynamic by mapping with the unit ciricle function
+-- | just a little bump to the derivative on the low amplitude range goes a long way!
 circ_dynamize :: Double -> Double 
-circ_dynamize x = max 0.05 . min 1 $ ((x*(2-x))**0.5 + 2*x) / 3
+circ_dynamize x = max 0.05 . min 1 $ ((x*(2-x))**0.5 + x) / 2
 
 
 
+
+{- 
+ - DEBUG
+ -}
+
+-- | test print a frame with dummy data to a file to preview changes without re-rendering an entire video
+__tp :: IO()
+__tp = writePng "./test_image.png" (bar_plot_480_48 ([fromIntegral i / 48 | i <- [0..47]], 
+                                    75, 
+                                    100, 
+                                    [0.25 + ((fromIntegral i / 48) + 1) / 2| i <- [0..47] ]))
 

@@ -18,8 +18,8 @@ import Codec.FFmpeg.Juicy (imageWriter)
 
 -- | Default FFMPEG settings for output video
 encoding_defaults = EncodingParams
-                        { epWidth = 1280
-                        , epHeight = 720
+                        { epWidth = 640
+                        , epHeight = 480
                         , epFps = 20
                         , epCodec = Nothing
                         , epPixelFormat = Nothing
@@ -34,7 +34,7 @@ render_bar_plot infile outfile = do
     writer <- imageWriter encoding_defaults outfile
     let bar_data = reverse $ bar_compute 48 soundData
         max_data = reverse $ profile_compute 48 soundData
-        in do mapM_ writer [(Just . bar_plot_480)  bd | bd <- zip4 bar_data [1..] (repeat (length bar_data)) max_data]
+        in do mapM_ writer [(Just . bar_plot_480_48)  bd | bd <- zip4 bar_data [1..] (repeat (length bar_data)) max_data]
               writer Nothing
               return ()
 
