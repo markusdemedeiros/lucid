@@ -1,34 +1,40 @@
-module Lib
-  ( runAudioPipelineTest,
-  )
-where
+module Lib where
 
-import Conduit (mapMC, mapM_C, runConduit, runConduitRes, takeC, toConsumer, (.|))
-import Control.Monad.Trans.Resource (runResourceT)
-import Dataflow
-import Processing (exampleFilter)
-import Reanimate (mkCircle, raster, reanimate)
-import Reanimate.Animation (Animation, SVG)
-import Reanimate.Raster (mkImage)
-import Reanimate.Render (Format (RenderMp4), Raster (RasterAuto), render)
-import Sound.File.Sndfile (Sample)
-import Sources
+import Util
+import Data
+import Graphics
+
+-- List libraries
+import Data.List (zip4, transpose)
+
+-- Ffmpeg bindings
+import Codec.FFmpeg
+import Codec.FFmpeg.Juicy (imageWriter)
+
 
 {-
- - Main interface for complete pipelins of actions
- -
+ - Main rendering code and FFMPEG bindings
  -}
 
-basicAudioPipeline :: FilePath -> (SoundStream a -> DataStream Double) -> (Double -> SVG) -> IO ()
-basicAudioPipeline path filter frameanimation = do
-  fileconduit <- startFileStream path :: IO (SoundStream Double)
-  runConduitRes (exampleFilter fileconduit .| renderingConduit 0.2 frameanimation) >>= renderanim
-  where
-    renderanim animation = render animation "./data/output.mp4" RasterAuto RenderMp4 400 300 60 False
+-- | Default FFMPEG settings for output video
+encoding_defaults = EncodingParams
+                        { epWidth = 640
+                        , epHeight = 480
+                        , epFps = 20
+                        , epCodec = Nothing
+                        , epPixelFormat = Nothing
+                        , epPreset = "medium"
+                        , epFormatName = Nothing }
 
-runAudioPipelineTest :: IO ()
-runAudioPipelineTest =
-  basicAudioPipeline
-    "./data/test_data.flac"
-    exampleFilter
-    (\s -> mkImage (50 + 2 * s) (50 + 2 * s) "./data/Haskell-Logo.svg")
+
+-- | Read a .wav file infile, and produce a .mp4 file containing the animation outfile
+render_bar_plot  :: FilePath -> FilePath -> IO()
+render_bar_plot infile outfile = do
+    soundData <- read_sound infile $ epFps encoding_defaults 
+    writer <- imageWriter encoding_defaults outfile
+    let bar_data = reverse $ bar_compute 48 soundData
+        max_data = reverse $ profile_compute 48 soundData
+        in do mapM_ writer [(Just . bar_plot_480_48)  bd | bd <- zip4 bar_data [1..] (repeat (length bar_data)) max_data]
+              writer Nothing
+              return ()
+

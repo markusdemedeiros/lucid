@@ -1,23 +1,25 @@
-# TODO: Replace `my-project` everywhere in this file with your project name.
-name:                my-project
+name:                lucid
 version:             0.1.0.0
 
 dependencies:
 - base >= 4.7 && < 5
-- conduit
-- conduit-audio
-- conduit-audio-sndfile
-- mtl
-- resourcet
+- storablevector
+- fft
+- array
+- carray
+- storablevector-carray
+- JuicyPixels
+- ffmpeg-light
 - hsndfile
-- vector
-- reanimate
+- hsndfile-storablevector
+- directory
+- process
 
 library:
   source-dirs: src
 
 executables:
-  my-project-exe:
+  lucid-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -25,10 +27,10 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - my-project
+    - lucid
 
 tests:
-  my-project-test:
+  lucid-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -36,6 +38,6 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - my-project
+    - lucid
     - tasty
     - tasty-hunit
