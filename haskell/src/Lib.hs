@@ -1,19 +1,23 @@
 module Lib where
 
 import Util
-
 import Data
 import Graphics
+
+-- List libraries
 import Data.List (zip4, transpose)
 
-
--- Animation library (ffmpeg bindings)
+-- Ffmpeg bindings
 import Codec.FFmpeg
 import Codec.FFmpeg.Juicy (imageWriter)
 
 
+{-
+ - Main rendering code and FFMPEG bindings
+ -}
 
-__test_params = EncodingParams
+-- | Default FFMPEG settings for output video
+encoding_defaults = EncodingParams
                         { epWidth = 1280
                         , epHeight = 720
                         , epFps = 20
@@ -23,21 +27,14 @@ __test_params = EncodingParams
                         , epFormatName = Nothing }
 
 
-default_writer :: FilePath -> IO (Maybe Frame -> IO())
-default_writer = imageWriter __test_params
-
+-- | Read a .wav file infile, and produce a .mp4 file containing the animation outfile
 render_bar_plot  :: FilePath -> FilePath -> IO()
 render_bar_plot infile outfile = do
-    -- read sound data from file
-    soundData <- read_sound infile sps
-    -- setup writer, send frames to file, close
-    writer <- setup_writer 
-    bar_data <- return (reverse (bar_compute 48 soundData))
-    max_data <- return (reverse $ (profile_compute 48 soundData))
-    mapM_ writer [(Just . bar_plot_480)  bd | bd <- zip4 bar_data [1..] (repeat (length bar_data)) max_data]
-    writer Nothing
-    return ()
-    where 
-        sps = epFps __test_params
-        setup_writer = default_writer outfile
+    soundData <- read_sound infile $ epFps encoding_defaults 
+    writer <- imageWriter encoding_defaults outfile
+    let bar_data = reverse $ bar_compute 48 soundData
+        max_data = reverse $ profile_compute 48 soundData
+        in do mapM_ writer [(Just . bar_plot_480)  bd | bd <- zip4 bar_data [1..] (repeat (length bar_data)) max_data]
+              writer Nothing
+              return ()
 
