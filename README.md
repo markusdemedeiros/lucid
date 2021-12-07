@@ -4,16 +4,23 @@ Lucid Visualization is an audio visualization tool that aims to create lucid, gr
 
 This project is in fulfillment of the [CPSC 312 2021W1 project requirements](https://steven-wolfman.github.io/cpsc-312-website/project.html).
 
+[Project Explanation Video] (https://youtu.be/AcDt1_8YBQw)
+[Render 0: MVP](https://youtu.be/lejykprmD3I)
+[Render 1: Africa](https://youtu.be/_OdjW5A2Vjw)
+[Render 2: Log Sine Sweep](https://youtu.be/zUjDS8iYG_k)
+[Render 3: Cantina Band](https://youtu.be/Q1asUrntCQc)
+[Render 4: Cloud Kisser](https://youtu.be/bix2TiaBb40)
+
+
 ## Team Members
 
 Our team is:
 
-+ Shaunak Tulshibagwale (98695802): nickname
-+ Jason Hsu (44346849): nickname 
-+ Peyton Seigo (67914911): nickname
-+ Markus de Medeiros (92214535): nickname
++ Shaunak Tulshibagwale (98695802)
++ Jason Hsu (44346849)
++ Peyton Seigo (67914911)
++ Markus de Medeiros (92214535)
 
-We call ourselves: optional awesome team name 2.
 
 ## Product Pitch
 
