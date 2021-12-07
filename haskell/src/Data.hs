@@ -2,7 +2,7 @@
 
 module Data (read_sound
             , SlicedSound
-            -- , seperate_freqs
+            , slice_vector
             , freqs_rescale
             , sup_norm
             , bar_compute
@@ -116,8 +116,6 @@ seperate_freqs_nonlinear n v = [ith_range i | i <- [0..(n-1)]]
           f_idx :: Int -> Int
           f_idx i = round $ (* fromIntegral (SV.length v - 1)) . nonlinear_f $ (fromIntegral i) / (fromIntegral n)
           
-
-
 
 
 -- | compute the infinity norm of a range of frequencies (average)
