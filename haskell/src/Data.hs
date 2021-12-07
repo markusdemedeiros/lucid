@@ -2,7 +2,7 @@
 
 module Data (read_sound
             , SlicedSound
-            , seperate_freqs
+            -- , seperate_freqs
             , freqs_rescale
             , sup_norm
             , bar_compute
@@ -94,10 +94,31 @@ read_sound file out_sps = do
  -}
 
 
--- | split a frequency into n even ranges, discarding from the top, and take the norm of each
+-- | split a frequency into n even ranges, discarding from the top
 seperate_freqs :: Int -> SampleFrequency -> [SampleFrequency]
 seperate_freqs buckets v = SV.sliceVertical chunksize v
     where chunksize = (SV.length v) `div` buckets
+
+
+-- | Seperates frequencies into n geometric ratio ranges, and takes their sup norm
+seperate_freqs_nonlinear :: Int -> SampleFrequency -> [Double]
+seperate_freqs_nonlinear n v = [ith_range i | i <- [0..(n-1)]]
+    where ith_range :: Int -> Double
+          ith_range i = sup_norm $ SV.take (ub-lb) $ SV.drop lb $ v
+            where lb = f_idx i
+                  ub = min (lb+10) (f_idx (i+1))  
+        
+          -- | Function from [0,1] to [0,1] which compensates for human hearing range
+          nonlinear_f :: Double -> Double 
+          nonlinear_f x = (x**3 + x) / 2
+         
+          -- | Rescales an index to be within (0,1), applies f, rescales to be within (0, length v - 1)
+          f_idx :: Int -> Int
+          f_idx i = round $ (* fromIntegral (SV.length v - 1)) . nonlinear_f $ (fromIntegral i) / (fromIntegral n)
+          
+
+
+
 
 -- | compute the infinity norm of a range of frequencies (average)
 sup_norm :: SampleFrequency -> Double
@@ -137,7 +158,7 @@ rolling_max n ls = ls''''
 -- | lists of bucketed and renormalized samples in the frequency domain,
 -- | corresponding to each timeslice.
 bar_compute :: Int -> SlicedSound -> [[Double]]
-bar_compute num_bars =  map (take num_bars . (map sup_norm) . seperate_freqs (num_bars+20)) . 
+bar_compute num_bars =  map (seperate_freqs_nonlinear num_bars) . 
                             freqs_rescale . frequency
 
 
@@ -145,7 +166,9 @@ bar_compute num_bars =  map (take num_bars . (map sup_norm) . seperate_freqs (nu
 -- | is the average over 8 timeslices of the bar_compute data. Seperate function
 -- | it needs different preprocessing to look good. 
 profile_compute :: Int -> SlicedSound -> [[Double]]
-profile_compute num_bars =  transpose . map (rolling_max 8) . transpose . map (take num_bars . (map sup_norm) . seperate_freqs (num_bars+20)) . freqs_rescale . frequency
+profile_compute num_bars =  transpose . map (rolling_max 8) . transpose . 
+                            map (seperate_freqs_nonlinear num_bars) . 
+                            freqs_rescale . frequency
 
 
 -- | Normalization of volume within a single frame. Each value in the output list is
