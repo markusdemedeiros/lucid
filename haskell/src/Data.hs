@@ -165,7 +165,7 @@ profile_compute num_bars =  transpose . map (rolling_max 8) . transpose . map (t
 -- If a frequency has *average* volume, it will be 0.5
 -- a frequency with 
 in_frame_normalize :: [Double] -> [Double]
-in_frame_normalize fs = rolling_max 10 . rolling_average 5 $ map (/ total) fs 
+in_frame_normalize fs = map (/ total) fs 
     where total = foldr1 (+) fs
 
 

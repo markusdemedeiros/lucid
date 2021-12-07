@@ -145,7 +145,7 @@ disc n d = max 0 . min (n-1) $ floor (fromIntegral (n-1) * d)
 -- makes a double more dynamic by mapping with the unit ciricle function
 -- just a little bump to the derivative on the low amplitude range goes a long way
 circ_dynamize :: Double -> Double 
-circ_dynamize x = min 1 $ ((x*(2-x))**0.5 + 2*x) / 3
+circ_dynamize x = max 0.05 . min 1 $ ((x*(2-x))**0.5 + 2*x) / 3
 
 
 

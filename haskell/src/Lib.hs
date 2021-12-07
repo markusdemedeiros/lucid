@@ -33,7 +33,7 @@ render_bar_plot infile outfile = do
     -- setup writer, send frames to file, close
     writer <- setup_writer 
     bar_data <- return (reverse (bar_compute 48 soundData))
-    max_data <- return (reverse (profile_compute 48 soundData))
+    max_data <- return (reverse $ (profile_compute 48 soundData))
     mapM_ writer [(Just . bar_plot_480)  bd | bd <- zip4 bar_data [1..] (repeat (length bar_data)) max_data]
     writer Nothing
     return ()
