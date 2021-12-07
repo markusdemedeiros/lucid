@@ -32,8 +32,8 @@ render_bar_plot  :: FilePath -> FilePath -> IO()
 render_bar_plot infile outfile = do
     soundData <- read_sound infile $ epFps encoding_defaults 
     writer <- imageWriter encoding_defaults outfile
-    let bar_data = reverse $ bar_compute 48 soundData
-        max_data = reverse $ profile_compute 48 soundData
+    let bar_data = bar_compute 48 soundData
+        max_data = profile_compute 48 soundData
         in do mapM_ writer [(Just . bar_plot_480_48)  bd | bd <- zip4 bar_data [1..] (repeat (length bar_data)) max_data]
               writer Nothing
               return ()

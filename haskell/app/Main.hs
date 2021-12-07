@@ -34,7 +34,7 @@ main_cli = getArgs >>= parse  >> exit_good
            parse _         = usage >> exit_die
 
 usage           = putStrLn "Usage: lucid [-vhi] [file]"
-version         = putStrLn "LucidVisualization version 0.1"
+version         = putStrLn "LucidVisualization version 1.0"
 exit_good       = exitWith ExitSuccess
 exit_die        = exitWith (ExitFailure 1)
 
