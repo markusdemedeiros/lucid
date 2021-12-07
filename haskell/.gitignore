@@ -2,3 +2,4 @@
 /dist
 /dist-newstyle
 *.cabal
+/data/*.mp4
