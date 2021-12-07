@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Data (read_sound, SlicedSound, seperate_freqs, freqs_rescale, sup_norm, bar_compute) where
+module Data (read_sound, SlicedSound, seperate_freqs, freqs_rescale, sup_norm, bar_compute, rolling_max, profile_compute, rolling_average, in_frame_normalize ) where
 
 import Util
 
@@ -145,8 +145,27 @@ rolling_average n ls = ls''''
 
 
 
-bar_compute :: Int -> SlicedSound -> [[Double]]
-bar_compute num_bars = transpose . map (rolling_average 2) .  transpose . map ((map sup_norm) . tail . seperate_freqs (num_bars+1)) . freqs_rescale . frequency
+-- Like a rolling average, but it's the MAX of the last n entries in the list
+rolling_max :: Int -> [Double] -> [Double]
+rolling_max n ls = ls''''
+    where ls' = take (n-1) (repeat 0.0) ++ ls 
+          ls'' = map (\n' -> drop n' ls') [0..n-1]
+          ls''' = take (length ls) $ transpose ls''
+          ls'''' = map (foldr1 max) ls'''
 
+
+
+bar_compute :: Int -> SlicedSound -> [[Double]]
+bar_compute num_bars =  map (take num_bars . (map sup_norm) . seperate_freqs (num_bars+20)) . freqs_rescale . frequency
+
+profile_compute :: Int -> SlicedSound -> [[Double]]
+profile_compute num_bars =  transpose . map (rolling_max 8) . transpose . map (take num_bars . (map sup_norm) . seperate_freqs (num_bars+20)) . freqs_rescale . frequency
+
+-- Normalization to within a single frame.
+-- If a frequency has *average* volume, it will be 0.5
+-- a frequency with 
+in_frame_normalize :: [Double] -> [Double]
+in_frame_normalize fs = rolling_max 10 . rolling_average 5 $ map (/ total) fs 
+    where total = foldr1 (+) fs
 
 
