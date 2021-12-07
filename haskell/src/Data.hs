@@ -1,13 +1,22 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Data (read_sound, SlicedSound, seperate_freqs, freqs_rescale, sup_norm, bar_compute, rolling_max, profile_compute, rolling_average, in_frame_normalize ) where
+module Data (read_sound
+            , SlicedSound
+            , seperate_freqs
+            , freqs_rescale
+            , sup_norm
+            , bar_compute
+            , rolling_max
+            , profile_compute
+            , rolling_average
+            , in_frame_normalize
+            ) where
 
 import Util
 
 -- Math Libraries
 import Data.Complex 
 import Math.FFT
-
 import Data.List (transpose)
 
 -- Additional vector processing libraries
@@ -28,9 +37,9 @@ import qualified Foreign.Storable                           as FS
  -}
 
 
+-- | A blob (buffer) of raw sound data. Shouldn't leave this module- only
+-- | vectors leave this module- but we need a buffer to take Fourier transforms.
 type SoundData = BV.Buffer Double
--- interp: A blob (buffer) of raw sound data. Shouldn't leave this module- only
--- vectors leave this module- but we need a buffer to take Fourier transforms.
 
 
 -- |'read_wav' (internal) reads raw file IO data 
@@ -43,36 +52,33 @@ read_wav file = do
         _ -> error "error: file read error"
 
 
-__t :: IO()
-__t = do
-    (info1, Just (d1 :: SoundData)) <- SF.readFile "./data/not-a-rickroll.wav"
-    print info1
-    (info, Just (d :: SoundData)) <- SF.readFile "./data/not-a-rickroll_mono.wav"
-    print info
-
-
--- Synonyms for 
+-- | Frequency representation of an audio file
 type SampleFrequency = SV.Vector (Complex Double)
+
+
+-- | Amplitude (sample) representation of an audio file
 type SampleAmplitude = SV.Vector Double
 
+
+-- | Sliced representation of an audio file, containing both the raw samples,
+-- |  the data in the frequency domain, and the playback rate
 data SlicedSound = SlicedSound 
     { frequency :: [SampleFrequency] 
     , amplitude :: [SampleAmplitude] 
     , framerate :: Int
     }
 
--- interp. a file sliced into timeslices 
--- frequency
--- amplitude
--- framerate
 
-
--- Slice vector into list of vectors, coercing input sample rate to output sample rate
+-- | Slice a vector into timeslices, given an input sample rate and a desired
+-- | output rate
+-- |    REQUIRES: in_sps <= ot_sps 
 slice_vector :: (FS.Storable a) => Int -> Int -> SV.Vector a -> [SV.Vector a]
 slice_vector in_sps ot_sps vec = SV.sliceVertical chunksize vec
     where chunksize = in_sps `div` ot_sps
 
 
+-- | Read a .wav file from disk, produce timesliced data in the sample and
+-- |    frequency domain with a specified output timeslice sample rate
 read_sound :: FilePath -> Int -> IO (SlicedSound)
 read_sound file out_sps = do
     (info, dat) <- read_wav file
@@ -82,60 +88,31 @@ read_sound file out_sps = do
                              , framerate = out_sps }
     
 
--- | Average channels together in multi-channel tracks
--- (BROKEN- WAV FORMAT IS MORE COMPLEX THEN I THOUGHT. USE FFMPEG ON THE FRONT LAYER INSTEAD)
-unchannel :: (SF.Info, SoundData) -> (SF.Info, SV.Vector Double)
-unchannel (info, dat) = (new_info, new_data)
-    where new_frames = frames info `div` channels info 
-
-          dat_unpacked :: SV.Vector Double
-          dat_unpacked = BV.fromBuffer dat
-          
-          -- gets the n'th (averaged) frame from dat_unpacked
-          -- starts at 0
-          get_frame :: Int -> Double
-          get_frame n = (/ fromIntegral (channels info)) . 
-                        foldr (+) 0 . 
-                        map (SV.index dat_unpacked) $ [(channels info)*n..(channels info)*(n+1)-1]
-          
-          new_data :: SV.Vector Double
-          new_data = SV.pack . map get_frame $ [0 .. new_frames - 1]
-
-          -- roses are red
-          -- LED's are brightening
-          -- I wish I understood lenses
-          -- but (<<%@=) is f****** frightening
-          new_info :: SF.Info
-          new_info = Info { frames = new_frames
-                          , samplerate = samplerate info `div` channels info
-                          , channels = 1
-                          , format = format info 
-                          , sections = sections info
-                          , seekable = seekable info }
-
-
 {-
- - File Processing
+ - Data Processing
  -
- - Helper functions to get different views of SlicedSound data, to be used directly by the graphics functions
  -}
 
 
--- |split a frequency into n even ranges, discarding from the top, and take the norm of each
+-- | split a frequency into n even ranges, discarding from the top, and take the norm of each
 seperate_freqs :: Int -> SampleFrequency -> [SampleFrequency]
 seperate_freqs buckets v = SV.sliceVertical chunksize v
     where chunksize = (SV.length v) `div` buckets
 
--- |compute the infinity norm of a range of frequencies (average)
+-- | compute the infinity norm of a range of frequencies (average)
 sup_norm :: SampleFrequency -> Double
 sup_norm samples = SV.maximum . SV.map magnitude $ samples
 
--- |renormalize an entire set of frequency data so it's maximum value has magnitude 1
+-- | renormalize an entire set of frequency data so it's maximum value has magnitude 1
 freqs_rescale :: [SampleFrequency] -> [SampleFrequency]
 freqs_rescale samples = map (SV.map (/(max_magnitude :+ 0))) $ samples
     where max_magnitude = maximum . map (SV.maximum . SV.map magnitude) $ samples
 
 
+-- | Produce a list where every element is the average of the last n elements (or
+-- | fewer, near the head of the list
+-- |
+-- | TODO: check this function again, and refactor.
 rolling_average :: Int -> [Double] -> [Double]
 rolling_average n ls = ls''''
     where ls' = take (n-1) (repeat 0.0) ++ ls 
@@ -144,8 +121,10 @@ rolling_average n ls = ls''''
           ls'''' = map ((/ fromIntegral n) . foldr1 (+)) ls'''
 
 
-
--- Like a rolling average, but it's the MAX of the last n entries in the list
+-- | Produce a list where every element is the maximum of the last n elements (or
+-- | fewer, near the head of the list
+-- |
+-- | TODO: check this function again, and refactor.
 rolling_max :: Int -> [Double] -> [Double]
 rolling_max n ls = ls''''
     where ls' = take (n-1) (repeat 0.0) ++ ls 
@@ -154,18 +133,23 @@ rolling_max n ls = ls''''
           ls'''' = map (foldr1 max) ls'''
 
 
-
+-- | Compute bar data for a n-bar visualization: output is a list of length n 
+-- | lists of bucketed and renormalized samples in the frequency domain,
+-- | corresponding to each timeslice.
 bar_compute :: Int -> SlicedSound -> [[Double]]
-bar_compute num_bars =  map (take num_bars . (map sup_norm) . seperate_freqs (num_bars+20)) . freqs_rescale . frequency
+bar_compute num_bars =  map (take num_bars . (map sup_norm) . seperate_freqs (num_bars+20)) . 
+                            freqs_rescale . frequency
 
+
+-- | Compute profile (long time average) data for the n-bar visualization: output
+-- | is the average over 8 timeslices of the bar_compute data. Seperate function
+-- | it needs different preprocessing to look good. 
 profile_compute :: Int -> SlicedSound -> [[Double]]
 profile_compute num_bars =  transpose . map (rolling_max 8) . transpose . map (take num_bars . (map sup_norm) . seperate_freqs (num_bars+20)) . freqs_rescale . frequency
 
--- Normalization to within a single frame.
--- If a frequency has *average* volume, it will be 0.5
--- a frequency with 
+
+-- | Normalization of volume within a single frame. Each value in the output list is
+-- | the percentage value of the list's sum that position of the input list
 in_frame_normalize :: [Double] -> [Double]
 in_frame_normalize fs = map (/ total) fs 
     where total = foldr1 (+) fs
-
-
